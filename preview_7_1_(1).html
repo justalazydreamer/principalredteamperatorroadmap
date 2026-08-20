@@ -1,0 +1,2127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Principal Red Team Operator — Interactive Roadmap (Cyberpunk Edition)</title>
+    <style>
+        :root {
+            --bg: #0a0a0a;
+            --bg2: #0d1117;
+            --card: #111518;
+            --border: #1e3a2a;
+            --green: #00ff41;
+            --green-dim: #00cc33;
+            --blue: #0a3a5a;
+            --blue-light: #1a6a9a;
+            --text: #c5d1c5;
+            --text-dim: #7a8a7a;
+            --accent: #00ff41;
+            --warning: #ffaa00;
+            --danger: #ff4444;
+            --optional: #ff00ff;
+            --font: 'Consolas', 'Monaco', 'Courier New', monospace;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--font);
+            font-size: 14px;
+            line-height: 1.6;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+        /* Animated grid background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                linear-gradient(rgba(0, 255, 65, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 65, 0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            z-index: -2;
+            pointer-events: none;
+        }
+        /* Scanline overlay */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent 0px,
+                transparent 2px,
+                rgba(0, 0, 0, 0.08) 2px,
+                rgba(0, 0, 0, 0.08) 4px
+            );
+            z-index: 9999;
+            pointer-events: none;
+            animation: scanline 8s linear infinite;
+        }
+        @keyframes scanline {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(100vh); }
+        }
+        /* Optional radial glows */
+        .glow-top {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(ellipse at 50% -20%, rgba(10, 58, 90, 0.3) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 100%, rgba(0, 255, 65, 0.05) 0%, transparent 50%);
+            z-index: -1;
+            pointer-events: none;
+        }
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg2);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--green-dim);
+        }
+        /* Header */
+        header {
+            position: sticky;
+            top: 0;
+            background: rgba(10, 10, 10, 0.92);
+            backdrop-filter: blur(12px);
+            border-bottom: 2px solid var(--border);
+            padding: 18px 28px;
+            z-index: 100;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            box-shadow: 0 0 30px rgba(0, 255, 65, 0.1);
+        }
+        .header-left h1 {
+            font-size: 1.5rem;
+            color: var(--green);
+            text-shadow: 0 0 20px rgba(0, 255, 65, 0.6), 0 0 40px rgba(0, 255, 65, 0.3);
+            letter-spacing: 2px;
+            font-weight: 700;
+            position: relative;
+            display: inline-block;
+            animation: glitch 3s infinite;
+        }
+        @keyframes glitch {
+            0%, 100% { text-shadow: 0 0 20px rgba(0,255,65,0.6), 0 0 40px rgba(0,255,65,0.3); }
+            95% { text-shadow: 0 0 20px rgba(0,255,65,0.6), 0 0 40px rgba(0,255,65,0.3); }
+            96% { text-shadow: -2px 0 #ff00ff, 2px 0 #00ffff; }
+            97% { text-shadow: 2px 0 #ff00ff, -2px 0 #00ffff; }
+            98% { text-shadow: -2px 0 #ff00ff, 2px 0 #00ffff; }
+            99% { text-shadow: 2px 0 #ff00ff, -2px 0 #00ffff; }
+        }
+        .header-left p {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            letter-spacing: 0.5px;
+        }
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        .progress-ring {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            border: 3px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            color: var(--green);
+            position: relative;
+            box-shadow: 0 0 15px rgba(0, 255, 65, 0.2);
+        }
+        .progress-ring svg {
+            position: absolute;
+            top: -3px;
+            left: -3px;
+            transform: rotate(-90deg);
+        }
+        .progress-ring circle {
+            fill: none;
+            stroke: var(--green);
+            stroke-width: 3;
+            stroke-dasharray: 138.2;
+            stroke-dashoffset: 138.2;
+            transition: stroke-dashoffset 0.5s ease;
+            filter: drop-shadow(0 0 6px var(--green));
+        }
+        .progress-ring span {
+            position: relative;
+            z-index: 1;
+            font-weight: bold;
+            font-size: 0.65rem;
+        }
+        .stats {
+            display: flex;
+            gap: 12px;
+            font-size: 0.7rem;
+            color: var(--text-dim);
+        }
+        .stats b {
+            color: var(--green);
+            font-size: 0.85rem;
+        }
+        .btn {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 6px 12px;
+            cursor: pointer;
+            font-family: var(--font);
+            font-size: 0.7rem;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        .btn:hover {
+            border-color: var(--green);
+            color: var(--green);
+            box-shadow: 0 0 12px rgba(0, 255, 65, 0.3);
+        }
+        .btn.danger:hover {
+            border-color: var(--danger);
+            color: var(--danger);
+            box-shadow: 0 0 12px rgba(255, 68, 68, 0.3);
+        }
+        /* Main */
+        main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px 20px 60px;
+            position: relative;
+            z-index: 1;
+        }
+        /* Disclaimer */
+        .disclaimer {
+            background: rgba(255, 68, 68, 0.08);
+            border: 1px solid rgba(255, 68, 68, 0.3);
+            border-left: 4px solid var(--danger);
+            padding: 14px 18px;
+            margin-bottom: 20px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            color: #ffcccc;
+            box-shadow: 0 0 20px rgba(255, 68, 68, 0.1);
+        }
+        .disclaimer b {
+            color: var(--danger);
+        }
+        /* Part container */
+        .part {
+            margin-bottom: 20px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            overflow: hidden;
+            background: rgba(17, 21, 24, 0.85);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+        }
+        .part:hover {
+            border-color: rgba(0, 255, 65, 0.4);
+            box-shadow: 0 0 30px rgba(0, 255, 65, 0.15);
+        }
+        .part.optional {
+            border-color: var(--optional) !important;
+            box-shadow: 0 0 20px rgba(255, 0, 255, 0.2);
+        }
+        .part.optional:hover {
+            box-shadow: 0 0 30px rgba(255, 0, 255, 0.3);
+            border-color: #ff66ff !important;
+        }
+        .part-header {
+            padding: 16px 22px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            user-select: none;
+            transition: background 0.3s ease;
+            background: rgba(0, 0, 0, 0.3);
+            border-bottom: 1px solid transparent;
+        }
+        .part-header:hover {
+            background: rgba(0, 255, 65, 0.04);
+        }
+        .part.optional .part-header:hover {
+            background: rgba(255, 0, 255, 0.04);
+        }
+        .part-header .part-num {
+            font-size: 1.6rem;
+            font-weight: 900;
+            color: var(--green);
+            text-shadow: 0 0 15px rgba(0, 255, 65, 0.5);
+            min-width: 44px;
+            text-align: center;
+        }
+        .part.optional .part-header .part-num {
+            color: var(--optional);
+            text-shadow: 0 0 15px rgba(255, 0, 255, 0.5);
+        }
+        .part-header .part-title {
+            flex: 1;
+        }
+        .part-header .part-title h2 {
+            font-size: 1.05rem;
+            color: var(--green);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+        .part.optional .part-header .part-title h2 {
+            color: var(--optional);
+        }
+        .part-header .part-title p {
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            letter-spacing: 0.5px;
+        }
+        .part-header .optional-badge {
+            background: rgba(255, 0, 255, 0.2);
+            border: 1px solid var(--optional);
+            color: var(--optional);
+            font-size: 0.55rem;
+            padding: 2px 8px;
+            border-radius: 10px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+        .part-header .part-progress {
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .part-header .part-progress .bar {
+            width: 80px;
+            height: 6px;
+            background: var(--bg2);
+            border-radius: 3px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+        .part.optional .part-header .part-progress .bar {
+            border-color: var(--optional);
+        }
+        .part-header .part-progress .bar .fill {
+            height: 100%;
+            background: var(--green);
+            border-radius: 3px;
+            transition: width 0.4s ease;
+            box-shadow: 0 0 8px rgba(0, 255, 65, 0.5);
+        }
+        .part.optional .part-header .part-progress .bar .fill {
+            background: var(--optional);
+            box-shadow: 0 0 8px rgba(255, 0, 255, 0.5);
+        }
+        .part-header .arrow {
+            font-size: 1.1rem;
+            color: var(--green);
+            transition: transform 0.3s ease;
+        }
+        .part.optional .part-header .arrow {
+            color: var(--optional);
+        }
+        .part.open .part-header .arrow {
+            transform: rotate(90deg);
+        }
+        .part.open .part-header {
+            border-bottom-color: var(--border);
+        }
+        .part-content {
+            display: none;
+            padding: 14px 18px 18px;
+        }
+        .part.open .part-content {
+            display: block;
+        }
+        /* Section card */
+        .section {
+            border: 1px solid rgba(0, 255, 65, 0.12);
+            border-radius: 8px;
+            margin-bottom: 12px;
+            background: rgba(10, 10, 10, 0.6);
+            overflow: hidden;
+            transition: border-color 0.3s ease;
+        }
+        .part.optional .section {
+            border: 1px solid rgba(255, 0, 255, 0.2);
+        }
+        .section:hover {
+            border-color: rgba(0, 255, 65, 0.25);
+        }
+        .part.optional .section:hover {
+            border-color: rgba(255, 0, 255, 0.4);
+        }
+        .section-header {
+            padding: 10px 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            user-select: none;
+            background: rgba(0, 255, 65, 0.03);
+            transition: background 0.3s ease;
+        }
+        .part.optional .section-header {
+            background: rgba(255, 0, 255, 0.03);
+        }
+        .section-header:hover {
+            background: rgba(0, 255, 65, 0.06);
+        }
+        .part.optional .section-header:hover {
+            background: rgba(255, 0, 255, 0.06);
+        }
+        .section-header .sec-num {
+            font-size: 0.75rem;
+            font-weight: 900;
+            color: var(--blue-light);
+            min-width: 34px;
+            letter-spacing: 1px;
+        }
+        .part.optional .section-header .sec-num {
+            color: #cc66cc;
+        }
+        .section-header .sec-title {
+            flex: 1;
+            font-weight: 600;
+            color: #dde;
+            font-size: 0.85rem;
+            letter-spacing: 0.3px;
+        }
+        .section-header .sec-count {
+            font-size: 0.65rem;
+            color: var(--text-dim);
+        }
+        .section-header .sec-arrow {
+            font-size: 0.8rem;
+            color: var(--green);
+            transition: transform 0.3s ease;
+        }
+        .part.optional .section-header .sec-arrow {
+            color: var(--optional);
+        }
+        .section.open .section-header .sec-arrow {
+            transform: rotate(90deg);
+        }
+        .section-content {
+            display: none;
+            padding: 6px 12px 12px;
+        }
+        .section.open .section-content {
+            display: block;
+        }
+        /* Topic item */
+        .topic {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 6px 8px;
+            border-radius: 6px;
+            transition: background 0.25s ease;
+            cursor: pointer;
+        }
+        .topic:hover {
+            background: rgba(0, 255, 65, 0.04);
+        }
+        .part.optional .topic:hover {
+            background: rgba(255, 0, 255, 0.04);
+        }
+        .topic input[type="checkbox"] {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border: 2px solid var(--border);
+            border-radius: 4px;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+            background: rgba(0, 0, 0, 0.5);
+        }
+        .topic input[type="checkbox"]:hover {
+            border-color: var(--green-dim);
+            box-shadow: 0 0 8px rgba(0, 255, 65, 0.2);
+        }
+        .part.optional .topic input[type="checkbox"]:hover {
+            border-color: var(--optional);
+            box-shadow: 0 0 8px rgba(255, 0, 255, 0.2);
+        }
+        .topic input[type="checkbox"]:checked {
+            background: var(--green);
+            border-color: var(--green);
+            box-shadow: 0 0 12px rgba(0, 255, 65, 0.4);
+        }
+        .part.optional .topic input[type="checkbox"]:checked {
+            background: var(--optional);
+            border-color: var(--optional);
+            box-shadow: 0 0 12px rgba(255, 0, 255, 0.4);
+        }
+        .topic input[type="checkbox"]:checked::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #000;
+            font-size: 11px;
+            font-weight: 900;
+        }
+        .topic .topic-name {
+            font-size: 0.78rem;
+            color: var(--text);
+            letter-spacing: 0.2px;
+            flex: 1;
+        }
+        .topic .topic-link {
+            font-size: 0.7rem;
+            color: var(--blue-light);
+            text-decoration: none;
+            padding: 3px 8px;
+            border: 1px solid rgba(26, 106, 154, 0.3);
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            letter-spacing: 0.3px;
+        }
+        .topic .topic-link:hover {
+            background: rgba(26, 106, 154, 0.15);
+            border-color: var(--blue-light);
+            color: #5ab8e8;
+            box-shadow: 0 0 8px rgba(26, 106, 154, 0.3);
+        }
+        .part.optional .topic .topic-link {
+            color: #cc66cc;
+            border-color: rgba(204, 102, 204, 0.3);
+        }
+        .part.optional .topic .topic-link:hover {
+            background: rgba(204, 102, 204, 0.15);
+            border-color: #cc66cc;
+            color: #ff99ff;
+            box-shadow: 0 0 8px rgba(204, 102, 204, 0.3);
+        }
+        .topic.completed .topic-name {
+            text-decoration: line-through;
+            color: var(--text-dim);
+        }
+        /* Responsive */
+        @media (max-width: 700px) {
+            header {
+                padding: 12px 16px;
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .header-left h1 {
+                font-size: 1.1rem;
+            }
+            .part-header {
+                padding: 12px 14px;
+                gap: 8px;
+            }
+            .part-header .part-num {
+                font-size: 1.2rem;
+                min-width: 30px;
+            }
+            .part-header .part-title h2 {
+                font-size: 0.85rem;
+            }
+            .section-header {
+                padding: 8px 10px;
+            }
+            .topic {
+                flex-wrap: wrap;
+                gap: 6px;
+            }
+            .topic .topic-link {
+                font-size: 0.65rem;
+                padding: 2px 6px;
+            }
+            main {
+                padding: 12px 10px 40px;
+            }
+            .stats {
+                font-size: 0.6rem;
+            }
+            .stats b {
+                font-size: 0.7rem;
+            }
+        }
+        @media (max-width: 450px) {
+            .part-header .part-progress .bar {
+                width: 50px;
+            }
+            .section-header .sec-title {
+                font-size: 0.75rem;
+            }
+            .topic .topic-name {
+                font-size: 0.7rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header id="main-header">
+        <div class="header-left">
+            <h1>⬢ PRINCIPAL RED TEAM OPERATOR</h1>
+            <p>Complete Curriculum — Gamified Learning Roadmap | 100% Free Resources</p>
+        </div>
+        <div class="header-right">
+            <div class="stats">
+                <span>Completed: <b id="stat-completed">0</b></span>
+                <span>Total: <b id="stat-total">0</b></span>
+                <span>Progress: <b id="stat-pct">0%</b></span>
+            </div>
+            <div class="progress-ring" id="progress-ring">
+                <svg width="54" height="54" viewBox="0 0 54 54">
+                    <circle cx="27" cy="27" r="22" stroke="var(--border)" stroke-width="3" fill="none" />
+                    <circle id="progress-circle" cx="27" cy="27" r="22" stroke="var(--green)" stroke-width="3" fill="none"
+                    stroke-dasharray="138.23" stroke-dashoffset="138.23" stroke-linecap="round" />
+                </svg>
+                <span id="ring-text">0%</span>
+            </div>
+            <button class="btn" onclick="expandAll()">▣ Expand All</button>
+            <button class="btn" onclick="collapseAll()">▢ Collapse All</button>
+            <button class="btn danger" onclick="resetProgress()">✖ Reset</button>
+        </div>
+    </header>
+
+    <main id="main-content">
+        <div class="disclaimer">
+            <b>⚠ IMPORTANT:</b> All offensive security topics (Parts VI–IX, X–XI) must be practiced only in
+            <b>authorized, isolated lab environments</b>. Use TryHackMe, HackTheBox, or your own VMs.
+            The goal is <b>defensive validation</b>, not attacking real systems without permission.
+            <br><br>
+            <b>Progression:</b> Foundation → Systems → Networking → Programming → Web → AD → Cloud → Vuln Research →
+            Offensive Security → Adversary Emulation → OPSEC → Reverse Engineering → Detection → Research →
+            Leadership → Principal
+            <br><br>
+            <span style="color:var(--optional); font-weight:bold;">✨ OPTIONAL SECTIONS:</span> Social Engineering, OSINT,
+            Kernel/rootkit development, and Physical Security are marked with a magenta border. They are not required but
+            will elevate your game to world-class principal level.
+        </div>
+        <div id="curriculum-container"></div>
+    </main>
+
+    <script>
+        // ============================================================
+        // COMPLETE CURRICULUM DATA — 48 Sections (46 core + 2 optional added as sections in optional parts)
+        // We add optional parts after existing parts, with flag `optional: true`
+        // ============================================================
+        const curriculumData = [{
+            id: 1,
+            title: "Core Foundations",
+            subtitle: "Security basics, networking, Linux & Windows mastery",
+            optional: false,
+            sections: [{
+                num: "1",
+                title: "Cybersecurity Fundamentals",
+                topics: [
+                    { n: "CIA Triad", u: "https://www.youtube.com/watch?v=SBcDGb9l6yo", s: "Professor Messer" },
+                    { n: "Threats, Vulnerabilities, Risks", u: "https://www.youtube.com/watch?v=6xUH0t6ugIM", s: "Professor Messer" },
+                    { n: "Security Controls", u: "https://csrc.nist.gov/pubs/sp/800/53/r5/upd1/final", s: "NIST 800-53" },
+                    { n: "Attack Surface", u: "https://cheatsheetseries.owasp.org/cheatsheets/Attack_Surface_Analysis_Cheat_Sheet.html", s: "OWASP Cheat Sheet" },
+                    { n: "Threat Modeling", u: "https://cheatsheetseries.owasp.org/cheatsheets/Threat_Modeling_Cheat_Sheet.html", s: "OWASP Cheat Sheet" },
+                    { n: "Authentication vs Authorization", u: "https://auth0.com/docs/get-started/identity-fundamentals/authentication-and-authorization", s: "Auth0 Docs" },
+                    { n: "Defense-in-Depth", u: "https://www.youtube.com/watch?v=HLQ4wX8NxQY", s: "Professor Messer" },
+                    { n: "Security Architecture", u: "https://csrc.nist.gov/pubs/sp/800/160/v2/r1/final", s: "NIST 800-160" }
+                ]
+            }, {
+                num: "2",
+                title: "Networking",
+                topics: [
+                    { n: "OSI Model", u: "https://www.cloudflare.com/learning/ddos/glossary/open-systems-interconnection-model-osi/", s: "Cloudflare Learning" },
+                    { n: "TCP/IP", u: "https://www.cloudflare.com/learning/ddos/glossary/tcp-ip/", s: "Cloudflare Learning" },
+                    { n: "Ethernet", u: "https://en.wikipedia.org/wiki/Ethernet", s: "Wikipedia" },
+                    { n: "IPv4 / IPv6", u: "https://en.wikipedia.org/wiki/IPv4", s: "Wikipedia" },
+                    { n: "TCP / UDP / ICMP", u: "https://en.wikipedia.org/wiki/Internet_protocol_suite", s: "Wikipedia" },
+                    { n: "ARP", u: "https://en.wikipedia.org/wiki/Address_Resolution_Protocol", s: "Wikipedia" },
+                    { n: "DNS", u: "https://www.cloudflare.com/learning/dns/what-is-dns/", s: "Cloudflare Learning" },
+                    { n: "DHCP", u: "https://en.wikipedia.org/wiki/Dynamic_Host_Configuration_Protocol", s: "Wikipedia" },
+                    { n: "Routing", u: "https://www.cloudflare.com/learning/network-layer/what-is-routing/", s: "Cloudflare Learning" },
+                    { n: "Switching", u: "https://en.wikipedia.org/wiki/Network_switch", s: "Wikipedia" },
+                    { n: "NAT", u: "https://en.wikipedia.org/wiki/Network_address_translation", s: "Wikipedia" },
+                    { n: "VPN", u: "https://www.cloudflare.com/learning/access-management/what-is-a-vpn/", s: "Cloudflare Learning" },
+                    { n: "Proxies", u: "https://en.wikipedia.org/wiki/Proxy_server", s: "Wikipedia" },
+                    { n: "Firewalls", u: "https://www.cloudflare.com/learning/security/what-is-a-firewall/", s: "Cloudflare Learning" },
+                    { n: "Network Segmentation", u: "https://www.cloudflare.com/learning/access-management/what-is-network-segmentation/", s: "Cloudflare Learning" },
+                    { n: "Network Monitoring", u: "https://tryhackme.com/room/introtonetworking", s: "TryHackMe" }
+                ]
+            }, {
+                num: "3",
+                title: "Linux",
+                topics: [
+                    { n: "Linux Architecture", u: "https://labex.io/lesson/kernel-overview", s: "Linux Journey (LabEx)" },
+                    { n: "Filesystems", u: "https://labex.io/lesson/filesystem-hierarchy", s: "Linux Journey (LabEx)" },
+                    { n: "Users and Groups", u: "https://labex.io/lesson/users-and-groups", s: "Linux Journey (LabEx)" },
+                    { n: "Permissions", u: "https://labex.io/lesson/file-permissions", s: "Linux Journey (LabEx)" },
+                    { n: "Processes", u: "https://labex.io/lesson/monitor-processes-ps-command", s: "Linux Journey (LabEx)" },
+                    { n: "Services", u: "https://labex.io/lesson/sysv-overview", s: "Linux Journey (LabEx)" },
+                    { n: "Package Management", u: "https://labex.io/lesson/software-distribution", s: "Linux Journey (LabEx)" },
+                    { n: "Shell/Bash", u: "https://labex.io/lesson/the-shell", s: "Linux Journey (LabEx)" },
+                    { n: "Networking", u: "https://labex.io/lesson/network-basics", s: "Linux Journey (LabEx)" },
+                    { n: "Logging", u: "https://labex.io/lesson/system-logging", s: "Linux Journey (LabEx)" },
+                    { n: "System Administration", u: "https://labex.io/courses/red-hat-system-administration-rh124-labs", s: "Linux Journey (LabEx)" }
+                ]
+            }, {
+                num: "4",
+                title: "Windows",
+                topics: [
+                    { n: "Windows Architecture", u: "https://learn.microsoft.com/en-us/windows/win32/desktop-programming", s: "Microsoft Learn" },
+                    { n: "Processes and Services", u: "https://learn.microsoft.com/en-us/windows/win32/services/services", s: "Microsoft Learn" },
+                    { n: "Registry", u: "https://learn.microsoft.com/en-us/windows/win32/sysinfo/registry", s: "Microsoft Learn" },
+                    { n: "Filesystems", u: "https://learn.microsoft.com/en-us/windows/win32/fileio/file-systems", s: "Microsoft Learn" },
+                    { n: "Permissions", u: "https://learn.microsoft.com/en-us/windows/win32/secauthz/access-control", s: "Microsoft Learn" },
+                    { n: "PowerShell", u: "https://learn.microsoft.com/en-us/powershell/scripting/overview", s: "Microsoft Learn" },
+                    { n: "Windows Authentication", u: "https://learn.microsoft.com/en-us/windows-server/security/windows-authentication/windows-authentication-overview", s: "Microsoft Learn" },
+                    { n: "Event Logging", u: "https://learn.microsoft.com/en-us/windows/win32/eventlog/event-logging", s: "Microsoft Learn" },
+                    { n: "Windows Security Architecture", u: "https://learn.microsoft.com/en-us/windows/win32/secauthz/access-control-model", s: "Microsoft Learn" },
+                    { n: "Windows Internals", u: "https://www.youtube.com/watch?v=7pQpc1g7foc", s: "Pavel Yosifovich" }
+                ]
+            }]
+        }, {
+            id: 2,
+            title: "Programming & Automation",
+            subtitle: "Python, PowerShell, Bash, and Low-Level programming",
+            optional: false,
+            sections: [{
+                num: "5",
+                title: "Python",
+                topics: [
+                    { n: "Python Fundamentals", u: "https://www.youtube.com/watch?v=rfscVS0vtbw", s: "FreeCodeCamp" },
+                    { n: "Data Structures", u: "https://docs.python.org/3/tutorial/datastructures.html", s: "Python Docs" },
+                    { n: "Networking", u: "https://docs.python.org/3/library/socket.html", s: "Python Docs" },
+                    { n: "HTTP/API Interaction", u: "https://docs.python.org/3/library/urllib.request.html", s: "Python Docs" },
+                    { n: "File Processing", u: "https://docs.python.org/3/tutorial/inputoutput.html", s: "Python Docs" },
+                    { n: "Automation", u: "https://automatetheboringstuff.com/", s: "Automate the Boring Stuff" },
+                    { n: "Concurrency", u: "https://docs.python.org/3/library/asyncio.html", s: "Python Docs" },
+                    { n: "Security Tool Development", u: "https://github.com/achillean/shodan-python", s: "Shodan Python" }
+                ]
+            }, {
+                num: "6",
+                title: "PowerShell",
+                topics: [
+                    { n: "PowerShell Fundamentals", u: "https://learn.microsoft.com/en-us/powershell/scripting/learn/ps101/01-getting-started", s: "Microsoft Learn" },
+                    { n: "Objects and Pipelines", u: "https://learn.microsoft.com/en-us/powershell/scripting/learn/ps101/04-pipelines", s: "Microsoft Learn" },
+                    { n: "Windows Administration", u: "https://learn.microsoft.com/en-us/powershell/scripting/samples/sample-scripts-for-administration", s: "Microsoft Learn" },
+                    { n: "Automation", u: "https://learn.microsoft.com/en-us/powershell/scripting/learn/ps101/09-functions", s: "Microsoft Learn" },
+                    { n: "Security Administration", u: "https://learn.microsoft.com/en-us/powershell/scripting/samples/working-with-software-installations", s: "Microsoft Learn" },
+                    { n: "API Interaction", u: "https://learn.microsoft.com/en-us/powershell/scripting/learn/ps101/10-script-modules", s: "Microsoft Learn" }
+                ]
+            }, {
+                num: "7",
+                title: "Bash & Unix Automation",
+                topics: [
+                    { n: "Shell Fundamentals", u: "https://www.gnu.org/software/bash/manual/html_node/Basic-Shell-Features.html", s: "GNU Bash Manual" },
+                    { n: "Pipes and Redirection", u: "https://www.gnu.org/software/bash/manual/html_node/Redirections.html", s: "GNU Bash Manual" },
+                    { n: "Text Processing", u: "https://www.gnu.org/software/gawk/manual/gawk.html", s: "GNU Awk Manual" },
+                    { n: "Process Management", u: "https://www.gnu.org/software/bash/manual/html_node/Job-Control.html", s: "GNU Bash Manual" },
+                    { n: "Automation", u: "https://www.gnu.org/software/bash/manual/html_node/Shell-Scripts.html", s: "GNU Bash Manual" },
+                    { n: "System Administration", u: "https://tldp.org/LDP/abs/html/index.html", s: "Advanced Bash-Scripting Guide" }
+                ]
+            }, {
+                num: "8",
+                title: "Low-Level Programming",
+                topics: [
+                    { n: "C Fundamentals", u: "https://beej.us/guide/bgc/", s: "Beej's Guide to C" },
+                    { n: "Memory Model", u: "https://beej.us/guide/bgc/html/split/manual-memory-allocation.html", s: "Beej's Guide" },
+                    { n: "Pointers", u: "https://beej.us/guide/bgc/html/split/pointers.html", s: "Beej's Guide" },
+                    { n: "Compilation", u: "https://beej.us/guide/bgc/html/split/hello-world.html", s: "Beej's Guide" },
+                    { n: "Linking", u: "https://beej.us/guide/bgc/html/split/multifile-projects.html", s: "Beej's Guide" },
+                    { n: "Assembly Fundamentals", u: "https://opensecuritytraining.info/IntroX86.html", s: "OpenSecurityTraining2" },
+                    { n: "x86/x64 Architecture", u: "https://opensecuritytraining.info/IntroX86-64.html", s: "OpenSecurityTraining2" },
+                    { n: "Debugging", u: "https://opensecuritytraining.info/IntermediateX86.html", s: "OpenSecurityTraining2" }
+                ]
+            }]
+        }, {
+            id: 3,
+            title: "Web & Application Security",
+            subtitle: "Web fundamentals, vulnerability classes, modern architecture",
+            optional: false,
+            sections: [{
+                num: "9",
+                title: "Web Fundamentals",
+                topics: [
+                    { n: "HTTP", u: "https://developer.mozilla.org/en-US/docs/Web/HTTP", s: "MDN Web Docs" },
+                    { n: "HTTPS/TLS", u: "https://www.cloudflare.com/learning/ssl/what-is-https/", s: "Cloudflare Learning" },
+                    { n: "Cookies", u: "https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Cookies", s: "MDN" },
+                    { n: "Sessions", u: "https://developer.mozilla.org/en-US/docs/Web/Security/Authentication/Session_management", s: "MDN" },
+                    { n: "Headers", u: "https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers", s: "MDN" },
+                    { n: "REST APIs", u: "https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Methods", s: "MDN" },
+                    { n: "WebSockets", u: "https://developer.mozilla.org/en-US/docs/Web/API/WebSocket", s: "MDN" },
+                    { n: "Authentication", u: "https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Authentication", s: "MDN" },
+                    { n: "Authorization", u: "https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CORS", s: "MDN" }
+                ]
+            }, {
+                num: "10",
+                title: "Web Vulnerability Classes",
+                topics: [
+                    { n: "Injection", u: "https://portswigger.net/web-security/sql-injection", s: "PortSwigger Academy" },
+                    { n: "Cross-Site Scripting", u: "https://portswigger.net/web-security/cross-site-scripting", s: "PortSwigger Academy" },
+                    { n: "Access-Control Issues", u: "https://portswigger.net/web-security/access-control", s: "PortSwigger Academy" },
+                    { n: "Authentication Weaknesses", u: "https://portswigger.net/web-security/authentication", s: "PortSwigger Academy" },
+                    { n: "Session Problems", u: "https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html", s: "OWASP Cheat Sheet" },
+                    { n: "File Handling Issues", u: "https://portswigger.net/web-security/file-upload", s: "PortSwigger Academy" },
+                    { n: "SSRF", u: "https://portswigger.net/web-security/ssrf", s: "PortSwigger Academy" },
+                    { n: "API Security", u: "https://owasp.org/www-project-api-security/", s: "OWASP API Security" },
+                    { n: "Business Logic Vulnerabilities", u: "https://portswigger.net/web-security/logic-flaws", s: "PortSwigger Academy" },
+                    { n: "Deserialization Concepts", u: "https://portswigger.net/web-security/deserialization", s: "PortSwigger Academy" }
+                ]
+            }, {
+                num: "11",
+                title: "Modern Application Architecture",
+                topics: [
+                    { n: "Microservices", u: "https://www.youtube.com/watch?v=CqCDOosvZIk", s: "FreeCodeCamp" },
+                    { n: "Containers", u: "https://docs.docker.com/get-started/", s: "Docker Docs" },
+                    { n: "APIs", u: "https://www.freecodecamp.org/learn/back-end-development-and-apis", s: "freeCodeCamp" },
+                    { n: "Serverless", u: "https://docs.aws.amazon.com/lambda/latest/dg/welcome.html", s: "AWS Lambda Docs" },
+                    { n: "OAuth/OIDC", u: "https://auth0.com/docs/authenticate/protocols/oauth", s: "Auth0 Docs" },
+                    { n: "SSO", u: "https://auth0.com/docs/authenticate/single-sign-on", s: "Auth0 Docs" },
+                    { n: "CI/CD", u: "https://docs.github.com/en/actions", s: "GitHub Actions Docs" },
+                    { n: "Software Supply Chain", u: "https://slsa.dev/", s: "SLSA Framework" }
+                ]
+            }]
+        }, {
+            id: 4,
+            title: "Identity & Enterprise Security",
+            subtitle: "Active Directory and Windows enterprise security",
+            optional: false,
+            sections: [{
+                num: "12",
+                title: "Active Directory",
+                topics: [
+                    { n: "AD Architecture", u: "https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/get-started/virtual-dc/active-directory-domain-services-overview", s: "Microsoft Learn" },
+                    { n: "Domains", u: "https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/plan/understanding-the-active-directory-logical-model", s: "Microsoft Learn" },
+                    { n: "Forests", u: "https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/plan/understanding-the-active-directory-logical-model", s: "Microsoft Learn" },
+                    { n: "Organizational Units", u: "https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/plan/understanding-the-active-directory-logical-model", s: "Microsoft Learn" },
+                    { n: "Groups", u: "https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/understand-security-groups", s: "Microsoft Learn" },
+                    { n: "Group Policy", u: "https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/group-policy/group-policy-overview", s: "Microsoft Learn" },
+                    { n: "LDAP", u: "https://learn.microsoft.com/en-us/windows/win32/adsi/ldap-adspath", s: "Microsoft Learn" },
+                    { n: "Kerberos", u: "https://www.thehacker.recipes/ad/movement/kerberos", s: "TheHacker.recipes" },
+                    { n: "NTLM", u: "https://www.thehacker.recipes/ad/movement/ntlm", s: "TheHacker.recipes" },
+                    { n: "Trusts", u: "https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/plan/understanding-the-active-directory-logical-model", s: "Microsoft Learn" },
+                    { n: "Privileged Accounts", u: "https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/plan/security-best-practices/appendix-b--privileged-accounts-and-groups-in-active-directory", s: "Microsoft Learn" },
+                    { n: "Identity Attack Paths", u: "https://www.thehacker.recipes/ad/", s: "TheHacker.recipes" },
+                    { n: "AD Detection", u: "https://tryhackme.com/room/activedirectoryhardening", s: "TryHackMe" }
+                ]
+            }, {
+                num: "13",
+                title: "Windows Enterprise Security",
+                topics: [
+                    { n: "Domain Controllers", u: "https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/get-started/virtual-dc/active-directory-domain-services-overview", s: "Microsoft Learn" },
+                    { n: "Authentication Infrastructure", u: "https://learn.microsoft.com/en-us/windows-server/security/windows-authentication/windows-authentication-overview", s: "Microsoft Learn" },
+                    { n: "Privileged Access", u: "https://learn.microsoft.com/en-us/security/privileged-access-workstations/overview", s: "Microsoft Learn" },
+                    { n: "Endpoint Security", u: "https://learn.microsoft.com/en-us/windows/security/operating-system-security/", s: "Microsoft Learn" },
+                    { n: "Security Policies", u: "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/security-policy-settings/security-policy-settings", s: "Microsoft Learn" },
+                    { n: "Windows Event Logs", u: "https://learn.microsoft.com/en-us/windows/win32/eventlog/event-logging", s: "Microsoft Learn" },
+                    { n: "EDR Concepts", u: "https://learn.microsoft.com/en-us/defender-endpoint/", s: "Microsoft Defender" },
+                    { n: "Identity Monitoring", u: "https://learn.microsoft.com/en-us/defender-for-identity/", s: "Microsoft Defender for Identity" }
+                ]
+            }]
+        }, {
+            id: 5,
+            title: "Cloud Security",
+            subtitle: "Cloud fundamentals, AWS, Azure/Entra, and GCP",
+            optional: false,
+            sections: [{
+                num: "14",
+                title: "Cloud Fundamentals",
+                topics: [
+                    { n: "Cloud Architecture", u: "https://docs.aws.amazon.com/whitepapers/latest/aws-overview/introduction.html", s: "AWS Overview" },
+                    { n: "IaaS/PaaS/SaaS", u: "https://docs.aws.amazon.com/whitepapers/latest/aws-overview/types-of-cloud-computing.html", s: "AWS Docs" },
+                    { n: "Virtual Networks", u: "https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html", s: "AWS VPC Docs" },
+                    { n: "IAM", u: "https://docs.aws.amazon.com/IAM/latest/UserGuide/introduction.html", s: "AWS IAM Docs" },
+                    { n: "Secrets Management", u: "https://docs.aws.amazon.com/secretsmanager/latest/userguide/intro.html", s: "AWS Secrets Manager" },
+                    { n: "Logging", u: "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-user-guide.html", s: "AWS CloudTrail" },
+                    { n: "Cloud Monitoring", u: "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/WhatIsCloudWatch.html", s: "AWS CloudWatch" }
+                ]
+            }, {
+                num: "15",
+                title: "AWS Security",
+                topics: [
+                    { n: "IAM", u: "https://docs.aws.amazon.com/IAM/latest/UserGuide/introduction.html", s: "AWS IAM Docs" },
+                    { n: "EC2", u: "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/concepts.html", s: "AWS EC2 Docs" },
+                    { n: "S3", u: "https://docs.aws.amazon.com/AmazonS3/latest/userguide/Welcome.html", s: "AWS S3 Docs" },
+                    { n: "VPC", u: "https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html", s: "AWS VPC Docs" },
+                    { n: "Lambda", u: "https://docs.aws.amazon.com/lambda/latest/dg/welcome.html", s: "AWS Lambda Docs" },
+                    { n: "CloudTrail", u: "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-user-guide.html", s: "AWS CloudTrail" },
+                    { n: "Security Groups", u: "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-security-groups.html", s: "AWS VPC Docs" },
+                    { n: "Cloud Attack Paths", u: "https://hackingthe.cloud/", s: "Hacking the Cloud" }
+                ]
+            }, {
+                num: "16",
+                title: "Azure / Entra",
+                topics: [
+                    { n: "Entra ID", u: "https://learn.microsoft.com/en-us/entra/identity/", s: "Microsoft Learn" },
+                    { n: "Azure IAM", u: "https://learn.microsoft.com/en-us/azure/role-based-access-control/overview", s: "Microsoft Learn" },
+                    { n: "Virtual Networks", u: "https://learn.microsoft.com/en-us/azure/virtual-network/virtual-networks-overview", s: "Microsoft Learn" },
+                    { n: "Managed Identities", u: "https://learn.microsoft.com/en-us/entra/identity/managed-identities-azure-resources/overview", s: "Microsoft Learn" },
+                    { n: "Conditional Access", u: "https://learn.microsoft.com/en-us/entra/identity/conditional-access/overview", s: "Microsoft Learn" },
+                    { n: "Azure Logging", u: "https://learn.microsoft.com/en-us/azure/azure-monitor/fundamentals/overview", s: "Microsoft Learn" },
+                    { n: "Cloud Identity Attack Paths", u: "https://learn.microsoft.com/en-us/entra/identity/monitoring-health/overview-monitoring-health", s: "Microsoft Learn" }
+                ]
+            }, {
+                num: "17",
+                title: "GCP",
+                topics: [
+                    { n: "IAM", u: "https://cloud.google.com/iam/docs/overview", s: "Google Cloud Docs" },
+                    { n: "Projects", u: "https://cloud.google.com/resource-manager/docs/creating-managing-projects", s: "Google Cloud Docs" },
+                    { n: "Service Accounts", u: "https://cloud.google.com/iam/docs/service-accounts", s: "Google Cloud Docs" },
+                    { n: "Networking", u: "https://cloud.google.com/vpc/docs/overview", s: "Google Cloud Docs" },
+                    { n: "Logging", u: "https://cloud.google.com/logging/docs/overview", s: "Google Cloud Docs" },
+                    { n: "Security Architecture", u: "https://cloud.google.com/security/overview/whitepaper", s: "Google Cloud Whitepaper" }
+                ]
+            }]
+        }, {
+            id: 6,
+            title: "Offensive Security",
+            subtitle: "Recon, vuln assessment, exploitation, privilege escalation",
+            optional: false,
+            sections: [{
+                num: "18",
+                title: "Reconnaissance",
+                topics: [
+                    { n: "Attack-Surface Discovery", u: "https://tryhackme.com/room/redteamrecon", s: "TryHackMe" },
+                    { n: "Asset Identification", u: "https://tryhackme.com/room/redteamrecon", s: "TryHackMe" },
+                    { n: "DNS Reconnaissance", u: "https://tryhackme.com/room/dnsreconnaissance", s: "TryHackMe" },
+                    { n: "Service Enumeration", u: "https://nmap.org/book/man.html", s: "Nmap Docs" },
+                    { n: "Technology Identification", u: "https://www.wappalyzer.com/", s: "Wappalyzer" },
+                    { n: "External Attack Surface", u: "https://tryhackme.com/room/redteamrecon", s: "TryHackMe" },
+                    { n: "Threat Intelligence", u: "https://attack.mitre.org/", s: "MITRE ATT&CK" }
+                ]
+            }, {
+                num: "19",
+                title: "Vulnerability Assessment",
+                topics: [
+                    { n: "Vulnerability Discovery", u: "https://tryhackme.com/room/vulnerabilityscanner", s: "TryHackMe" },
+                    { n: "Validation", u: "https://tryhackme.com/room/vulnerabilityscanner", s: "TryHackMe" },
+                    { n: "Risk Analysis", u: "https://nvd.nist.gov/vuln-metrics/cvss", s: "NIST CVSS" },
+                    { n: "False Positives", u: "https://tryhackme.com/room/vulnerabilityscanner", s: "TryHackMe" },
+                    { n: "Exploitability Assessment", u: "https://nvd.nist.gov/vuln-metrics/cvss", s: "NIST CVSS" },
+                    { n: "Prioritization", u: "https://nvd.nist.gov/vuln-metrics/cvss", s: "NIST CVSS" }
+                ]
+            }, {
+                num: "20",
+                title: "Exploitation Fundamentals",
+                topics: [
+                    { n: "Exploit Concepts", u: "https://tryhackme.com/room/exploitingavulnerabilityv2", s: "TryHackMe" },
+                    { n: "Memory Corruption Concepts", u: "https://opensecuritytraining.info/Exploits1.html", s: "OpenSecurityTraining2" },
+                    { n: "Authentication Attacks", u: "https://tryhackme.com/room/authenticationbypass", s: "TryHackMe" },
+                    { n: "Web Exploitation", u: "https://portswigger.net/web-security/all-topics", s: "PortSwigger Academy" },
+                    { n: "Network-Service Exploitation", u: "https://tryhackme.com/room/networkservices", s: "TryHackMe" },
+                    { n: "Privilege Boundaries", u: "https://tryhackme.com/room/linuxprivilegeescalation", s: "TryHackMe" },
+                    { n: "Post-Exploitation Concepts", u: "https://tryhackme.com/room/postexploit", s: "TryHackMe" }
+                ]
+            }, {
+                num: "21",
+                title: "Privilege Escalation",
+                topics: [
+                    { n: "Linux Privilege Boundaries", u: "https://tryhackme.com/room/linuxprivilegeescalation", s: "TryHackMe" },
+                    { n: "Windows Privilege Boundaries", u: "https://tryhackme.com/room/windowsprivilegeescalation", s: "TryHackMe" },
+                    { n: "Misconfigurations", u: "https://book.hacktricks.xyz/linux-hardening/privilege-escalation", s: "HackTricks" },
+                    { n: "Service Security", u: "https://book.hacktricks.xyz/linux-hardening/privilege-escalation", s: "HackTricks" },
+                    { n: "Credential Exposure", u: "https://book.hacktricks.xyz/windows-hardening/windows-local-privilege-escalation", s: "HackTricks" },
+                    { n: "Identity-Based Escalation", u: "https://www.thehacker.recipes/ad/movement/", s: "TheHacker.recipes" },
+                    { n: "Defensive Detection", u: "https://tryhackme.com/room/defensivesecurity", s: "TryHackMe" }
+                ]
+            }]
+        }, {
+            id: 7,
+            title: "Red Team Tradecraft",
+            subtitle: "Adversary emulation, C2, OPSEC, lateral movement",
+            optional: false,
+            sections: [{
+                num: "22",
+                title: "Adversary Emulation",
+                topics: [
+                    { n: "MITRE ATT&CK", u: "https://attack.mitre.org/", s: "MITRE ATT&CK" },
+                    { n: "Threat Actor Research", u: "https://attack.mitre.org/groups/", s: "MITRE Groups" },
+                    { n: "Tactics and Techniques", u: "https://attack.mitre.org/tactics/enterprise/", s: "MITRE Tactics" },
+                    { n: "Campaign Modeling", u: "https://attack.mitre.org/campaigns/", s: "MITRE Campaigns" },
+                    { n: "Attack-Path Development", u: "https://www.thehacker.recipes/ad/", s: "TheHacker.recipes" },
+                    { n: "Emulation Planning", u: "https://attack.mitre.org/resources/adversary-emulation-plans/", s: "MITRE Emulation Plans" },
+                    { n: "Detection Validation", u: "https://github.com/redcanaryco/atomic-red-team", s: "Atomic Red Team" }
+                ]
+            }, {
+                num: "23",
+                title: "Command & Control Concepts",
+                topics: [
+                    { n: "C2 Architecture", u: "https://github.com/BishopFox/sliver", s: "Sliver C2" },
+                    { n: "Communication Channels", u: "https://github.com/BishopFox/sliver/wiki", s: "Sliver Wiki" },
+                    { n: "Infrastructure Design", u: "https://github.com/bluscreenofjeff/Red-Team-Infrastructure-Wiki", s: "RT Infra Wiki" },
+                    { n: "Authentication", u: "https://github.com/BishopFox/sliver/wiki", s: "Sliver Wiki" },
+                    { n: "Encryption", u: "https://github.com/BishopFox/sliver/wiki", s: "Sliver Wiki" },
+                    { n: "Infrastructure Monitoring", u: "https://github.com/BishopFox/sliver/wiki", s: "Sliver Wiki" },
+                    { n: "Safe C2 Lab Design", u: "https://github.com/bluscreenofjeff/Red-Team-Infrastructure-Wiki", s: "RT Infra Wiki" }
+                ]
+            }, {
+                num: "24",
+                title: "Operational Security",
+                topics: [
+                    { n: "OPSEC Fundamentals", u: "https://www.youtube.com/watch?v=-FU3Ax92bis", s: "PowerCert Animated Videos" },
+                    { n: "Identity Separation", u: "https://github.com/bluscreenofjeff/Red-Team-Infrastructure-Wiki", s: "RT Infra Wiki" },
+                    { n: "Infrastructure Hygiene", u: "https://github.com/bluscreenofjeff/Red-Team-Infrastructure-Wiki", s: "RT Infra Wiki" },
+                    { n: "Metadata", u: "https://www.youtube.com/watch?v=-FU3Ax92bis", s: "PowerCert Animated Videos" },
+                    { n: "Logging Exposure", u: "https://github.com/bluscreenofjeff/Red-Team-Infrastructure-Wiki", s: "RT Infra Wiki" },
+                    { n: "Operational Risk", u: "https://github.com/bluscreenofjeff/Red-Team-Infrastructure-Wiki", s: "RT Infra Wiki" },
+                    { n: "Compromise Scenarios", u: "https://github.com/bluscreenofjeff/Red-Team-Infrastructure-Wiki", s: "RT Infra Wiki" },
+                    { n: "Cleanup and Documentation", u: "https://github.com/bluscreenofjeff/Red-Team-Infrastructure-Wiki", s: "RT Infra Wiki" }
+                ]
+            }, {
+                num: "25",
+                title: "Lateral Movement",
+                topics: [
+                    { n: "Enterprise Trust Relationships", u: "https://www.thehacker.recipes/ad/movement/", s: "TheHacker.recipes" },
+                    { n: "Remote Administration", u: "https://tryhackme.com/room/lateralmovement", s: "TryHackMe" },
+                    { n: "Identity-Based Movement", u: "https://www.thehacker.recipes/ad/movement/", s: "TheHacker.recipes" },
+                    { n: "Network Segmentation", u: "https://tryhackme.com/room/lateralmovement", s: "TryHackMe" },
+                    { n: "Attack-Path Analysis", u: "https://www.thehacker.recipes/ad/", s: "TheHacker.recipes" },
+                    { n: "Detection Opportunities", u: "https://attack.mitre.org/tactics/TA0008/", s: "MITRE ATT&CK" }
+                ]
+            }]
+        }, {
+            id: 8,
+            title: "Reverse Engineering & Research",
+            subtitle: "Reverse engineering, vuln research, malware analysis",
+            optional: false,
+            sections: [{
+                num: "26",
+                title: "Reverse Engineering",
+                topics: [
+                    { n: "Assembly", u: "https://opensecuritytraining.info/IntroX86.html", s: "OpenSecurityTraining2" },
+                    { n: "PE Files", u: "https://learn.microsoft.com/en-us/windows/win32/debug/pe-format", s: "Microsoft Learn" },
+                    { n: "ELF Files", u: "https://linux.die.net/man/5/elf", s: "Linux man pages" },
+                    { n: "Debuggers", u: "https://ghidra-sre.org/", s: "Ghidra" },
+                    { n: "Static Analysis", u: "https://ghidra-sre.org/", s: "Ghidra" },
+                    { n: "Dynamic Analysis", u: "https://x64dbg.com/", s: "x64dbg" },
+                    { n: "Function Analysis", u: "https://ghidra-sre.org/", s: "Ghidra" },
+                    { n: "Program Behavior", u: "https://opensecuritytraining.info/AdvancedX86.html", s: "OpenSecurityTraining2" }
+                ]
+            }, {
+                num: "27",
+                title: "Vulnerability Research",
+                topics: [
+                    { n: "CVE/CWE", u: "https://cwe.mitre.org/", s: "CWE Database" },
+                    { n: "Root-Cause Analysis", u: "https://nvd.nist.gov/", s: "NVD" },
+                    { n: "Source-Code Review", u: "https://github.com/ossf/oss-vulnerability-guide", s: "OSSF Guide" },
+                    { n: "Fuzzing Concepts", u: "https://github.com/AFLplusplus/AFLplusplus", s: "AFL++" },
+                    { n: "Crash Analysis", u: "https://github.com/AFLplusplus/AFLplusplus", s: "AFL++" },
+                    { n: "Exploitability Analysis", u: "https://nvd.nist.gov/vuln-metrics/cvss", s: "NIST CVSS" },
+                    { n: "Security Research Methodology", u: "https://googleprojectzero.blogspot.com/", s: "Project Zero" }
+                ]
+            }, {
+                num: "28",
+                title: "Malware Analysis",
+                topics: [
+                    { n: "Malware Fundamentals", u: "https://malwareunicorn.org/workshops/re101.html", s: "Malware Unicorn (workshops site)" },
+                    { n: "Static Analysis", u: "https://malwareunicorn.org/workshops/re101.html", s: "Malware Unicorn (workshops site)" },
+                    { n: "Dynamic Analysis", u: "https://malwareunicorn.org/workshops/re101.html", s: "Malware Unicorn (workshops site)" },
+                    { n: "Behavioral Analysis", u: "https://malwareunicorn.org/workshops/re101.html", s: "Malware Unicorn (workshops site)" },
+                    { n: "Indicators", u: "https://malwareunicorn.org/workshops/re101.html", s: "Malware Unicorn (workshops site)" },
+                    { n: "Detection Development", u: "https://github.com/VirusTotal/yara", s: "YARA" },
+                    { n: "Threat Intelligence", u: "https://attack.mitre.org/", s: "MITRE ATT&CK" }
+                ]
+            }]
+        }, {
+            id: 9,
+            title: "Detection & Evasion",
+            subtitle: "Defensive telemetry, detection engineering, evasion concepts",
+            optional: false,
+            sections: [{
+                num: "29",
+                title: "Defensive Telemetry",
+                topics: [
+                    { n: "Windows Telemetry", u: "https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon", s: "Sysmon Docs" },
+                    { n: "Linux Telemetry", u: "https://linux.die.net/man/8/auditd", s: "auditd man" },
+                    { n: "Network Telemetry", u: "https://docs.zeek.org/en/master/", s: "Zeek Docs" },
+                    { n: "Cloud Telemetry", u: "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-user-guide.html", s: "AWS CloudTrail" },
+                    { n: "EDR", u: "https://learn.microsoft.com/en-us/defender-endpoint/", s: "Microsoft Defender" },
+                    { n: "SIEM", u: "https://www.splunk.com/en_us/resources/videos/splunk-free.html", s: "Splunk Free" },
+                    { n: "Detection Pipelines", u: "https://github.com/SigmaHQ/sigma", s: "Sigma" }
+                ]
+            }, {
+                num: "30",
+                title: "Detection Engineering",
+                topics: [
+                    { n: "Detection Logic", u: "https://github.com/SigmaHQ/sigma", s: "Sigma" },
+                    { n: "Sigma", u: "https://github.com/SigmaHQ/sigma", s: "Sigma Rules" },
+                    { n: "YARA", u: "https://github.com/VirusTotal/yara", s: "YARA" },
+                    { n: "Behavioral Detection", u: "https://github.com/SigmaHQ/sigma", s: "Sigma" },
+                    { n: "Attack-Path Detection", u: "https://attack.mitre.org/detections/", s: "MITRE ATT&CK" },
+                    { n: "Alert Triage", u: "https://www.splunk.com/en_us/resources/videos/splunk-free.html", s: "Splunk Free" },
+                    { n: "Detection Validation", u: "https://github.com/redcanaryco/atomic-red-team", s: "Atomic Red Team" }
+                ]
+            }, {
+                num: "31",
+                title: "Evasion Concepts",
+                topics: [
+                    { n: "Security-Control Awareness", u: "https://attack.mitre.org/mitigations/enterprise/", s: "MITRE Mitigations" },
+                    { n: "Telemetry Analysis", u: "https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon", s: "Sysmon Docs" },
+                    { n: "Detection Gaps", u: "https://attack.mitre.org/detections/", s: "MITRE ATT&CK" },
+                    { n: "Control Validation", u: "https://github.com/redcanaryco/atomic-red-team", s: "Atomic Red Team" },
+                    { n: "Measuring Defensive Resilience", u: "https://attack.mitre.org/", s: "MITRE ATT&CK" }
+                ]
+            }]
+        }, {
+            id: 10,
+            title: "Specialized Domains",
+            subtitle: "Mobile, Wireless, IoT/Embedded, Container & Kubernetes",
+            optional: false,
+            sections: [{
+                num: "32",
+                title: "Mobile Security",
+                topics: [
+                    { n: "Android", u: "https://owasp.org/www-project-mobile-security-testing-guide/", s: "OWASP MASTG" },
+                    { n: "iOS", u: "https://owasp.org/www-project-mobile-security-testing-guide/", s: "OWASP MASTG" },
+                    { n: "Mobile Applications", u: "https://owasp.org/www-project-mobile-security-testing-guide/", s: "OWASP MASTG" },
+                    { n: "Mobile APIs", u: "https://owasp.org/www-project-mobile-security-testing-guide/", s: "OWASP MASTG" },
+                    { n: "Mobile Authentication", u: "https://owasp.org/www-project-mobile-security-testing-guide/", s: "OWASP MASTG" }
+                ]
+            }, {
+                num: "33",
+                title: "Wireless Security",
+                topics: [
+                    { n: "Wi-Fi Architecture", u: "https://www.aircrack-ng.org/doku.php", s: "Aircrack-ng Docs" },
+                    { n: "Authentication", u: "https://www.aircrack-ng.org/doku.php", s: "Aircrack-ng Docs" },
+                    { n: "Wireless Encryption", u: "https://www.aircrack-ng.org/doku.php", s: "Aircrack-ng Docs" },
+                    { n: "Network Segmentation", u: "https://www.aircrack-ng.org/doku.php", s: "Aircrack-ng Docs" },
+                    { n: "Wireless Monitoring", u: "https://www.wireshark.org/docs/", s: "Wireshark Docs" }
+                ]
+            }, {
+                num: "34",
+                title: "IoT / Embedded",
+                topics: [
+                    { n: "Embedded Architecture", u: "https://github.com/ReFirmLabs/binwalk", s: "Binwalk" },
+                    { n: "Firmware", u: "https://github.com/ReFirmLabs/binwalk", s: "Binwalk" },
+                    { n: "Hardware Interfaces", u: "https://learn.sparkfun.com/tutorials/serial-communication", s: "SparkFun" },
+                    { n: "IoT Protocols", u: "https://mqtt.org/", s: "MQTT.org" },
+                    { n: "Firmware Analysis", u: "https://github.com/ReFirmLabs/binwalk", s: "Binwalk" }
+                ]
+            }, {
+                num: "35",
+                title: "Container & Kubernetes Security",
+                topics: [
+                    { n: "Docker", u: "https://docs.docker.com/", s: "Docker Docs" },
+                    { n: "Container Isolation", u: "https://docs.docker.com/engine/security/", s: "Docker Security" },
+                    { n: "Kubernetes Architecture", u: "https://kubernetes.io/docs/concepts/architecture/", s: "K8s Docs" },
+                    { n: "RBAC", u: "https://kubernetes.io/docs/reference/access-authn-authz/rbac/", s: "K8s Docs" },
+                    { n: "Secrets", u: "https://kubernetes.io/docs/concepts/configuration/secret/", s: "K8s Docs" },
+                    { n: "Cluster Security", u: "https://kubernetes.io/docs/tasks/administer-cluster/securing-a-cluster/", s: "K8s Docs" },
+                    { n: "Cloud-Native Attack Surface", u: "https://kubernetes.io/docs/concepts/security/", s: "K8s Docs" }
+                ]
+            }]
+        }, {
+            id: 11,
+            title: "AI Security",
+            subtitle: "AI/LLM security and red-teaming",
+            optional: false,
+            sections: [{
+                num: "36",
+                title: "AI/LLM Security",
+                topics: [
+                    { n: "LLM Architecture", u: "https://owasp.org/www-project-top-10-for-large-language-model-applications/", s: "OWASP LLM Top 10" },
+                    { n: "AI Application Architecture", u: "https://owasp.org/www-project-top-10-for-large-language-model-applications/", s: "OWASP LLM Top 10" },
+                    { n: "Prompt Injection", u: "https://owasp.org/www-project-top-10-for-large-language-model-applications/", s: "OWASP LLM Top 10" },
+                    { n: "Excessive Agency", u: "https://owasp.org/www-project-top-10-for-large-language-model-applications/", s: "OWASP LLM Top 10" },
+                    { n: "Tool/Agent Security", u: "https://owasp.org/www-project-top-10-for-large-language-model-applications/", s: "OWASP LLM Top 10" },
+                    { n: "Model/API Security", u: "https://owasp.org/www-project-top-10-for-large-language-model-applications/", s: "OWASP LLM Top 10" },
+                    { n: "AI Supply Chain", u: "https://owasp.org/www-project-top-10-for-large-language-model-applications/", s: "OWASP LLM Top 10" },
+                    { n: "AI Red-Team Methodology", u: "https://owasp.org/www-project-top-10-for-large-language-model-applications/", s: "OWASP LLM Top 10" }
+                ]
+            }]
+        },
+        // ============ OPTIONAL SECTIONS ============
+        {
+            id: "opt1",
+            title: "Optional Specializations",
+            subtitle: "Advanced domains to elevate your principal-level game",
+            optional: true,
+            sections: [{
+                num: "47",
+                title: "Social Engineering",
+                topics: [
+                    { n: "Social Engineering Fundamentals", u: "https://www.social-engineer.org/framework/", s: "Social-Engineer.org" },
+                    { n: "Phishing & Pretexting", u: "https://tryhackme.com/room/phishingemails1", s: "TryHackMe" },
+                    { n: "OSINT for Social Engineering", u: "https://osintframework.com/", s: "OSINT Framework" },
+                    { n: "Physical Social Engineering", u: "https://www.youtube.com/watch?v=O5lXUSMGQ2I", s: "DEF CON 23" },
+                    { n: "Influence & Manipulation", u: "https://www.youtube.com/watch?v=JraHV1ai9eQ", s: "Chris Hadnagy" }
+                ]
+            }, {
+                num: "48",
+                title: "OSINT (Open Source Intelligence)",
+                topics: [
+                    { n: "OSINT Fundamentals", u: "https://osintframework.com/", s: "OSINT Framework" },
+                    { n: "Passive Reconnaissance", u: "https://tryhackme.com/room/ohsint", s: "TryHackMe" },
+                    { n: "Social Media OSINT", u: "https://github.com/laramies/theHarvester", s: "theHarvester" },
+                    { n: "Geolocation OSINT", u: "https://www.bellingcat.com/category/resources/", s: "Bellingcat Resources" },
+                    { n: "Domain & IP OSINT", u: "https://github.com/laramies/theHarvester", s: "theHarvester" },
+                    { n: "OSINT Tools Collection", u: "https://github.com/jivoi/awesome-osint", s: "Awesome OSINT" }
+                ]
+            }, {
+                num: "49",
+                title: "Kernel-Level & Rootkit Development",
+                topics: [
+                    { n: "Linux Kernel Modules", u: "https://sysprog21.github.io/lkmpg/", s: "Linux Kernel Module Guide" },
+                    { n: "Windows Kernel Drivers", u: "https://learn.microsoft.com/en-us/windows-hardware/drivers/", s: "Microsoft Driver Docs" },
+                    { n: "Rootkit Techniques", u: "https://github.com/milabs/awesome-linux-rootkits", s: "awesome-linux-rootkits" },
+                    { n: "eBPF for Evasion", u: "https://ebpf.io/what-is-ebpf/", s: "eBPF.io" },
+                    { n: "Kernel Debugging", u: "https://learn.microsoft.com/en-us/windows-hardware/drivers/debugger/", s: "WinDbg Docs" },
+                    { n: "Rootkit Detection & Analysis", u: "https://malwareunicorn.org/workshops/re101.html", s: "Malware Unicorn (workshops site)" }
+                ]
+            }, {
+                num: "50",
+                title: "Physical Security",
+                topics: [
+                    { n: "Lock Picking Basics", u: "https://www.youtube.com/watch?v=R2r07NN21vM", s: "BosnianBill" },
+                    { n: "Physical Penetration Testing", u: "https://www.youtube.com/watch?v=rnmcRTnTNC8", s: "Deviant Ollam" },
+                    { n: "RFID & Access Control", u: "https://www.youtube.com/watch?v=kVMAgiJlQkI", s: "DEF CON 23" },
+                    { n: "Surveillance & Tailgating", u: "https://www.youtube.com/watch?v=kVMAgiJlQkI", s: "DEF CON 23" },
+                    { n: "Physical Security Assessments", u: "https://www.redteamsecure.com/", s: "RedTeam Secure" }
+                ]
+            }]
+        },
+        {
+            id: 12,
+            title: "Red Team Operations",
+            subtitle: "Engagement planning, campaign execution, purple teaming",
+            optional: false,
+            sections: [{
+                num: "37",
+                title: "Engagement Planning",
+                topics: [
+                    { n: "Objectives", u: "https://attack.mitre.org/resources/", s: "MITRE Resources" },
+                    { n: "Scope", u: "https://attack.mitre.org/resources/", s: "MITRE Resources" },
+                    { n: "Rules of Engagement", u: "https://attack.mitre.org/resources/", s: "MITRE Resources" },
+                    { n: "Constraints", u: "https://attack.mitre.org/resources/", s: "MITRE Resources" },
+                    { n: "Safety Controls", u: "https://attack.mitre.org/resources/", s: "MITRE Resources" },
+                    { n: "Communications Plan", u: "https://attack.mitre.org/resources/", s: "MITRE Resources" },
+                    { n: "Stop Conditions", u: "https://attack.mitre.org/resources/", s: "MITRE Resources" }
+                ]
+            }, {
+                num: "38",
+                title: "Campaign Execution",
+                topics: [
+                    { n: "Initial Objectives", u: "https://attack.mitre.org/resources/adversary-emulation-plans/", s: "MITRE Emulation" },
+                    { n: "Attack-Path Management", u: "https://www.thehacker.recipes/ad/", s: "TheHacker.recipes" },
+                    { n: "Evidence Collection", u: "https://attack.mitre.org/resources/", s: "MITRE Resources" },
+                    { n: "Decision Points", u: "https://attack.mitre.org/resources/", s: "MITRE Resources" },
+                    { n: "Risk Management", u: "https://attack.mitre.org/resources/", s: "MITRE Resources" },
+                    { n: "Detection Interaction", u: "https://github.com/redcanaryco/atomic-red-team", s: "Atomic Red Team" },
+                    { n: "Operational Reporting", u: "https://attack.mitre.org/resources/", s: "MITRE Resources" }
+                ]
+            }, {
+                num: "39",
+                title: "Purple Teaming",
+                topics: [
+                    { n: "Red/Blue Collaboration", u: "https://github.com/redcanaryco/atomic-red-team", s: "Atomic Red Team" },
+                    { n: "Detection Validation", u: "https://github.com/redcanaryco/atomic-red-team", s: "Atomic Red Team" },
+                    { n: "Attack Replay", u: "https://github.com/redcanaryco/atomic-red-team", s: "Atomic Red Team" },
+                    { n: "Detection Improvement", u: "https://github.com/SigmaHQ/sigma", s: "Sigma" },
+                    { n: "Coverage Measurement", u: "https://attack.mitre.org/", s: "MITRE ATT&CK" },
+                    { n: "Lessons Learned", u: "https://attack.mitre.org/resources/", s: "MITRE Resources" }
+                ]
+            }]
+        }, {
+            id: 13,
+            title: "Principal-Level Skills",
+            subtitle: "Security architecture, advanced threat intel, leadership, program design",
+            optional: false,
+            sections: [{
+                num: "40",
+                title: "Security Architecture",
+                topics: [
+                    { n: "Enterprise Architecture", u: "https://sabsa.org/", s: "SABSA" },
+                    { n: "Identity Architecture", u: "https://learn.microsoft.com/en-us/entra/identity/", s: "Microsoft Entra" },
+                    { n: "Network Architecture", u: "https://csrc.nist.gov/pubs/sp/800/215/final", s: "NIST SP 800-215" },
+                    { n: "Cloud Architecture", u: "https://docs.aws.amazon.com/whitepapers/latest/aws-overview/introduction.html", s: "AWS Whitepaper" },
+                    { n: "Security Control Design", u: "https://csrc.nist.gov/pubs/sp/800/53/r5/upd1/final", s: "NIST 800-53" },
+                    { n: "Attack-Path Modeling", u: "https://www.thehacker.recipes/ad/movement/index", s: "TheHacker.recipes" }
+                ]
+            }, {
+                num: "41",
+                title: "Advanced Threat Intelligence",
+                topics: [
+                    { n: "Threat Actor Profiling", u: "https://attack.mitre.org/groups/", s: "MITRE Groups" },
+                    { n: "Campaign Analysis", u: "https://attack.mitre.org/campaigns/", s: "MITRE Campaigns" },
+                    { n: "Intelligence Requirements", u: "https://cloud.google.com/blog/topics/threat-intelligence/requirements-driven-approach-cti/", s: "Mandiant" },
+                    { n: "Attribution Limitations", u: "https://lawfaremedia.org/article/cyberattack-attribution-empowerment-and-constraint", s: "Lawfare" },
+                    { n: "Strategic Intelligence", u: "https://arxiv.org/pdf/2001.06616", s: "CTI Research (arXiv)" },
+                    { n: "Intelligence-to-Operation Pipeline", u: "https://quartermaster.substack.com/p/the-quartermaster-wednesday-12-june", s: "F3EAD Cycle" }
+                ]
+            }, {
+                num: "42",
+                title: "Leadership",
+                topics: [
+                    { n: "Mentoring Operators", u: "https://en.wikipedia.org/wiki/Mentorship", s: "Wikipedia" },
+                    { n: "Technical Leadership", u: "https://en.wikipedia.org/wiki/Lead_programmer", s: "Wikipedia (Tech Lead)" },
+                    { n: "Decision-Making", u: "https://en.wikipedia.org/wiki/OODA_loop", s: "Wikipedia (OODA Loop)" },
+                    { n: "Delegation", u: "https://en.wikipedia.org/wiki/Delegation", s: "Wikipedia" },
+                    { n: "Team Development", u: "https://en.wikipedia.org/wiki/Tuckman%27s_stages_of_group_development", s: "Wikipedia (Tuckman)" },
+                    { n: "Handling Operational Failure", u: "https://sre.google/sre-book/postmortem-culture/", s: "Google SRE Book" }
+                ]
+            }, {
+                num: "43",
+                title: "Program Design",
+                topics: [
+                    { n: "Building a Red-Team Program", u: "https://csrc.nist.gov/pubs/sp/800/115/final", s: "NIST SP 800-115" },
+                    { n: "Team Structure", u: "https://en.wikipedia.org/wiki/Red_team", s: "Wikipedia (Red Team)" },
+                    { n: "Tooling Strategy", u: "https://github.com/BishopFox/sliver", s: "Sliver" },
+                    { n: "Infrastructure Strategy", u: "https://github.com/bluscreenofjeff/Red-Team-Infrastructure-Wiki", s: "RT Infra Wiki" },
+                    { n: "Metrics", u: "https://attack.mitre.org/resources/attack-data-and-tools/", s: "MITRE ATT&CK" },
+                    { n: "Budgeting", u: "https://csrc.nist.gov/pubs/sp/800/53/r5/upd1/final", s: "NIST 800-53" },
+                    { n: "Risk Management", u: "https://csrc.nist.gov/pubs/sp/800/30/r1/final", s: "NIST 800-30" },
+                    { n: "Executive Stakeholder Management", u: "https://tryhackme.com/room/writingpentestreports", s: "TryHackMe" }
+                ]
+            }]
+        }, {
+            id: 14,
+            title: "Reporting",
+            subtitle: "Technical and executive reporting",
+            optional: false,
+            sections: [{
+                num: "44",
+                title: "Technical Reporting",
+                topics: [
+                    { n: "Finding Documentation", u: "https://owasp.org/www-project-web-security-testing-guide/", s: "OWASP WSTG" },
+                    { n: "Evidence", u: "https://tryhackme.com/room/writingpentestreports", s: "TryHackMe" },
+                    { n: "Reproduction", u: "https://github.com/OWASP/wstg", s: "OWASP WSTG (GitHub)" },
+                    { n: "Root Cause", u: "https://cwe.mitre.org/", s: "CWE Database" },
+                    { n: "Risk", u: "https://nvd.nist.gov/vuln-metrics/cvss", s: "NIST CVSS" },
+                    { n: "Remediation", u: "https://attack.mitre.org/mitigations/enterprise/", s: "MITRE Mitigations" }
+                ]
+            }, {
+                num: "45",
+                title: "Executive Reporting",
+                topics: [
+                    { n: "Business Impact", u: "https://tryhackme.com/room/writingpentestreports", s: "TryHackMe" },
+                    { n: "Attack Narrative", u: "https://attack.mitre.org/matrices/enterprise/", s: "MITRE ATT&CK Matrix" },
+                    { n: "Critical Attack Paths", u: "https://www.thehacker.recipes/ad/", s: "TheHacker.recipes" },
+                    { n: "Defensive Gaps", u: "https://attack.mitre.org/detections/", s: "MITRE ATT&CK" },
+                    { n: "Strategic Recommendations", u: "https://attack.mitre.org/mitigations/enterprise/", s: "MITRE Mitigations" }
+                ]
+            }]
+        }, {
+            id: 15,
+            title: "Principal Capstone",
+            subtitle: "Full enterprise simulation — put it all together",
+            optional: false,
+            sections: [{
+                num: "46",
+                title: "Full Enterprise Simulation",
+                topics: [
+                    { n: "Threat Intelligence Brief", u: "https://attack.mitre.org/groups/", s: "MITRE Groups" },
+                    { n: "Threat Model", u: "https://owasp.org/www-community/Threat_Modeling", s: "OWASP" },
+                    { n: "Rules of Engagement", u: "https://www.sans.org/posters/pen-test-rules-of-engagement-worksheet/", s: "SANS Institute" },
+                    { n: "Attack-Surface Assessment", u: "https://tryhackme.com/room/redteamrecon", s: "TryHackMe" },
+                    { n: "Identity Assessment", u: "https://www.thehacker.recipes/ad/", s: "TheHacker.recipes" },
+                    { n: "Cloud Assessment", u: "https://hackingthe.cloud/", s: "Hacking the Cloud" },
+                    { n: "Adversary Emulation", u: "https://attack.mitre.org/resources/adversary-emulation-plans/", s: "MITRE Emulation" },
+                    { n: "Detection Validation", u: "https://github.com/redcanaryco/atomic-red-team", s: "Atomic Red Team" },
+                    { n: "Purple-Team Review", u: "https://github.com/redcanaryco/atomic-red-team", s: "Atomic Red Team" },
+                    { n: "Technical Report", u: "https://tryhackme.com/room/writingpentestreports", s: "TryHackMe" },
+                    { n: "Executive Briefing", u: "https://tryhackme.com/room/writingpentestreports", s: "TryHackMe" },
+                    { n: "After-Action Review", u: "https://www.cisa.gov/resources-tools/services/cisa-tabletop-exercise-packages", s: "CISA" },
+                    { n: "Defensive Improvement Plan", u: "https://attack.mitre.org/mitigations/enterprise/", s: "MITRE Mitigations" }
+                ]
+            }]
+        }];
+
+        // ============================================================
+
+        /* ============================================================
+           PRINCIPAL RED TEAM OPERATOR — MASTERY LAYER
+           Adds depth without deleting the original curriculum.
+           ============================================================ */
+        const principalUpgrade = {
+            title: "Principal Operator Mastery Layer",
+            subtitle: "Turns the existing roadmap into a learn → lab → validate → build → operate → defend progression",
+            tracks: [
+                {
+                    title: "01 — Operator Tradecraft",
+                    purpose: "Convert technical knowledge into disciplined, authorized operations.",
+                    skills: [
+                        "Mission objectives and success criteria",
+                        "Operational assumptions and hypotheses",
+                        "Rules of engagement and scope control",
+                        "Deconfliction and communications",
+                        "Operational risk management",
+                        "Evidence discipline and chain of custody",
+                        "Stop/abort conditions",
+                        "After-action review"
+                    ],
+                    deliverable: "Write an engagement plan for an isolated enterprise lab, including objectives, scope, assumptions, safety controls, stop conditions, evidence plan, and reporting plan."
+                },
+                {
+                    title: "02 — Advanced Identity & Active Directory",
+                    purpose: "Build deep enterprise identity and attack-path reasoning.",
+                    skills: [
+                        "Kerberos internals and authentication flows",
+                        "NTLM internals and credential exposure concepts",
+                        "LDAP and directory enumeration concepts",
+                        "AD CS architecture and abuse paths",
+                        "Delegation and trust relationships",
+                        "GPO and privilege boundaries",
+                        "Identity attack-path analysis",
+                        "Hybrid AD / Entra identity architecture"
+                    ],
+                    deliverable: "Build an isolated AD lab, map identity relationships, document attack paths, and produce a defensive validation report."
+                },
+                {
+                    title: "03 — Cloud Adversary Operations",
+                    purpose: "Treat cloud identity, control planes, workloads, and telemetry as one attack surface.",
+                    skills: [
+                        "AWS, Azure/Entra, and GCP identity models",
+                        "Cloud control-plane security",
+                        "IAM privilege analysis",
+                        "Cloud network segmentation",
+                        "Workload and metadata security",
+                        "Secrets and credential exposure",
+                        "Cloud logging and telemetry",
+                        "Cloud attack-path analysis and remediation"
+                    ],
+                    deliverable: "Assess a deliberately vulnerable cloud lab and produce an attack-path, evidence, detection, and remediation package."
+                },
+                {
+                    title: "04 — Security Tool Engineering",
+                    purpose: "Develop the engineering ability to build, automate, test, and maintain security tooling.",
+                    skills: [
+                        "Python security automation",
+                        "Go for security tooling",
+                        "C/C++ systems fundamentals",
+                        "PowerShell and Bash automation",
+                        "API and protocol integration",
+                        "Parsing and data pipelines",
+                        "CLI design and error handling",
+                        "Unit testing, logging, documentation, and safe lab validation"
+                    ],
+                    deliverable: "Build one original security-automation tool, with tests, documentation, threat model, safe-use boundaries, and a technical demo."
+                },
+                {
+                    title: "05 — C2 & Infrastructure Engineering",
+                    purpose: "Understand controlled command-and-control architecture as an engineering and detection problem.",
+                    skills: [
+                        "C2 architecture and components",
+                        "Protocol and transport concepts",
+                        "Authentication and cryptographic design concepts",
+                        "Infrastructure separation",
+                        "Reliability and failure handling",
+                        "Telemetry and detection surface",
+                        "Infrastructure documentation",
+                        "Controlled adversary simulation in isolated labs"
+                    ],
+                    deliverable: "Design and document a lab-only C2 simulation architecture, including communication flow, logging, detection opportunities, and teardown procedure."
+                },
+                {
+                    title: "06 — Vulnerability Research",
+                    purpose: "Move from using exploits to understanding why vulnerabilities exist.",
+                    skills: [
+                        "CVE/CWE taxonomy",
+                        "Attack-surface modeling",
+                        "Source-code review",
+                        "Root-cause analysis",
+                        "Fuzzing fundamentals",
+                        "Bug-class analysis",
+                        "Reproduction in intentionally vulnerable targets",
+                        "Patch/remediation and regression validation"
+                    ],
+                    deliverable: "Analyze an intentionally vulnerable application or binary, document root cause and impact, reproduce safely, and propose a regression test."
+                },
+                {
+                    title: "07 — Reverse Engineering",
+                    purpose: "Develop binary and program-behavior analysis skills that support research and advanced operations.",
+                    skills: [
+                        "x86/x64 architecture",
+                        "Calling conventions",
+                        "PE and ELF formats",
+                        "Static analysis",
+                        "Dynamic analysis",
+                        "Ghidra workflows",
+                        "WinDbg/x64dbg workflows",
+                        "Behavior and root-cause analysis"
+                    ],
+                    deliverable: "Reverse-engineer a benign or intentionally vulnerable lab binary and produce an annotated technical analysis."
+                },
+                {
+                    title: "08 — Detection-Aware Red Teaming",
+                    purpose: "Understand what the defender can see and validate security controls.",
+                    skills: [
+                        "Windows and Linux telemetry",
+                        "Cloud logging",
+                        "MITRE ATT&CK mapping",
+                        "Sigma and detection logic",
+                        "Detection validation",
+                        "False-positive analysis",
+                        "Coverage measurement",
+                        "Attack replay and purple-team review"
+                    ],
+                    deliverable: "Run a controlled lab simulation, map behaviors to telemetry, write detection hypotheses, validate them, and measure coverage."
+                },
+                {
+                    title: "09 — Threat Intelligence for Operators",
+                    purpose: "Turn intelligence into operational decisions rather than passive reporting.",
+                    skills: [
+                        "Intelligence requirements",
+                        "Threat-actor and campaign analysis",
+                        "TTP analysis",
+                        "Infrastructure analysis",
+                        "Source validation",
+                        "Confidence assessment",
+                        "Hypothesis development",
+                        "Intelligence-driven planning"
+                    ],
+                    deliverable: "Produce an intelligence brief that changes the proposed approach to a simulated engagement."
+                },
+                {
+                    title: "10 — Enterprise Operations",
+                    purpose: "Practice realistic multi-stage operations in progressively harder authorized environments.",
+                    skills: [
+                        "Small enterprise lab",
+                        "Windows/Linux mixed environment",
+                        "Active Directory enterprise",
+                        "Hybrid identity",
+                        "Cloud-connected enterprise",
+                        "Network segmentation",
+                        "Attack-path management",
+                        "Evidence and reporting workflow"
+                    ],
+                    deliverable: "Complete a staged enterprise simulation from scope and discovery through validation, reporting, remediation recommendations, and retest."
+                },
+                {
+                    title: "11 — Principal Leadership",
+                    purpose: "Develop the architecture, communication, and leadership capabilities expected at principal level.",
+                    skills: [
+                        "Security architecture",
+                        "Risk-based prioritization",
+                        "Business impact analysis",
+                        "Executive communication",
+                        "Technical report writing",
+                        "Campaign leadership",
+                        "Mentoring and review",
+                        "Strategic recommendations"
+                    ],
+                    deliverable: "Present a technical report and executive briefing that explains attack paths, business risk, defensive gaps, priorities, and measurable next steps."
+                },
+                {
+                    title: "12 — Principal Capstone",
+                    purpose: "Demonstrate integrated capability rather than topic completion.",
+                    skills: [
+                        "Threat intelligence brief",
+                        "Threat model",
+                        "Rules of engagement",
+                        "Attack-surface assessment",
+                        "Identity assessment",
+                        "Cloud assessment",
+                        "Adversary emulation",
+                        "Detection validation",
+                        "Purple-team review",
+                        "Technical and executive reporting",
+                        "After-action review",
+                        "Defensive improvement plan"
+                    ],
+                    deliverable: "Defend a complete enterprise simulation package in an authorized lab, including evidence, attack-path reasoning, detection findings, remediation priorities, retest results, and executive briefing."
+                }
+            ]
+        };
+
+        function renderPrincipalUpgrade() {
+            const main = document.getElementById("main-content");
+            if (!main || document.getElementById("principal-mastery")) return;
+
+            const section = document.createElement("section");
+            section.id = "principal-mastery";
+            section.className = "principal-mastery";
+
+            section.innerHTML = `
+                <div class="pm-header">
+                    <div>
+                        <div class="pm-kicker">UPGRADE — DO NOT REPLACE ORIGINAL ROADMAP</div>
+                        <h2>${principalUpgrade.title}</h2>
+                        <p>${principalUpgrade.subtitle}</p>
+                    </div>
+                    <div class="pm-badge">PRINCIPAL TRACK</div>
+                </div>
+
+                <div class="pm-flow">
+                    <span>LEARN</span><b>→</b><span>STUDY</span><b>→</b>
+                    <span>LAB</span><b>→</b><span>EXERCISE</span><b>→</b>
+                    <span>CHECKPOINT</span><b>→</b><span>MASTER</span><b>→</b>
+                    <span>PROJECT</span><b>→</b><span>OPERATE</span><b>→</b>
+                    <span>DEFEND</span>
+                </div>
+
+                <div class="pm-grid">
+                    ${principalUpgrade.tracks.map((track, i) => `
+                        <article class="pm-card">
+                            <div class="pm-card-top">
+                                <span class="pm-number">${String(i + 1).padStart(2, "0")}</span>
+                                <span class="pm-status">CORE</span>
+                            </div>
+                            <h3>${track.title}</h3>
+                            <p class="pm-purpose">${track.purpose}</p>
+                            <h4>Capability Checklist</h4>
+                            <ul>
+                                ${track.skills.map(s => `<li><label><input type="checkbox" class="pm-check"> <span>${s}</span></label></li>`).join("")}
+                            </ul>
+                            <div class="pm-deliverable">
+                                <strong>Mastery Deliverable</strong>
+                                <p>${track.deliverable}</p>
+                            </div>
+                            <div class="pm-mastery">
+                                <label><input type="checkbox" class="pm-check"> Learned</label>
+                                <label><input type="checkbox" class="pm-check"> Practiced</label>
+                                <label><input type="checkbox" class="pm-check"> Exercise Complete</label>
+                                <label><input type="checkbox" class="pm-check"> Checkpoint Passed</label>
+                                <label><input type="checkbox" class="pm-check"> Mastered</label>
+                            </div>
+                        </article>
+                    `).join("")}
+                </div>
+
+                <div class="pm-projects">
+                    <h3>Principal Project Ladder</h3>
+                    <div class="pm-project-grid">
+                        <div><b>PROJECT 01</b><span>Security Automation Tool</span></div>
+                        <div><b>PROJECT 02</b><span>Enterprise AD Lab</span></div>
+                        <div><b>PROJECT 03</b><span>ATT&CK-Based Adversary Simulation</span></div>
+                        <div><b>PROJECT 04</b><span>Cloud Security Assessment Lab</span></div>
+                        <div><b>PROJECT 05</b><span>Detection Validation / Purple Team</span></div>
+                        <div><b>PROJECT 06</b><span>Vulnerability Research Case Study</span></div>
+                        <div><b>PROJECT 07</b><span>Full Principal Enterprise Capstone</span></div>
+                    </div>
+                </div>
+
+                <div class="pm-rule">
+                    <strong>Mastery Rule:</strong>
+                    A checkbox is not proof of professional capability. For every major skill, produce a lab result,
+                    technical evidence, written explanation, and repeatable validation before calling it mastered.
+                    Practice offensive techniques only against systems you own or are explicitly authorized to test.
+                </div>
+            `;
+
+            main.appendChild(section);
+
+            const checks = section.querySelectorAll(".pm-check");
+            const key = "principal_operator_mastery_v1";
+            const saved = JSON.parse(localStorage.getItem(key) || "[]");
+            checks.forEach((c, i) => {
+                c.checked = !!saved[i];
+                c.addEventListener("change", () => {
+                    localStorage.setItem(key, JSON.stringify([...checks].map(x => x.checked)));
+                });
+            });
+        }
+
+        /* ============================================================
+           PRINCIPAL MASTERY LAYER STYLES
+           ============================================================ */
+        const pmStyle = document.createElement("style");
+        pmStyle.textContent = `
+            .principal-mastery{
+                margin:32px auto 60px;
+                max-width:1400px;
+                padding:0 18px;
+            }
+            .pm-header{
+                display:flex;
+                justify-content:space-between;
+                gap:20px;
+                align-items:center;
+                padding:26px;
+                border:1px solid var(--border);
+                border-radius:18px;
+                background:linear-gradient(135deg,rgba(0,255,150,.06),rgba(0,0,0,.10));
+                margin-bottom:16px;
+            }
+            .pm-kicker{
+                font-size:.72rem;
+                letter-spacing:.14em;
+                font-weight:800;
+                color:var(--green);
+                margin-bottom:7px;
+            }
+            .pm-header h2{margin:0 0 7px;font-size:1.7rem}
+            .pm-header p{margin:0;opacity:.78}
+            .pm-badge,.pm-status{
+                border:1px solid var(--green);
+                color:var(--green);
+                border-radius:999px;
+                padding:7px 11px;
+                font-size:.7rem;
+                font-weight:800;
+                letter-spacing:.08em;
+                white-space:nowrap;
+            }
+            .pm-flow{
+                display:flex;
+                flex-wrap:wrap;
+                align-items:center;
+                justify-content:center;
+                gap:8px;
+                padding:14px;
+                margin-bottom:18px;
+                border:1px solid var(--border);
+                border-radius:14px;
+                background:rgba(255,255,255,.02);
+                font-size:.72rem;
+                font-weight:800;
+            }
+            .pm-flow span{padding:5px 7px;border-radius:6px;background:rgba(255,255,255,.04)}
+            .pm-flow b{opacity:.45}
+            .pm-grid{
+                display:grid;
+                grid-template-columns:repeat(auto-fit,minmax(330px,1fr));
+                gap:16px;
+            }
+            .pm-card{
+                border:1px solid var(--border);
+                border-radius:16px;
+                padding:20px;
+                background:rgba(255,255,255,.018);
+            }
+            .pm-card-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+            .pm-number{font-weight:900;font-size:1.1rem;opacity:.45}
+            .pm-card h3{margin:0 0 9px;font-size:1.08rem}
+            .pm-purpose{font-size:.84rem;opacity:.75;line-height:1.55}
+            .pm-card h4{font-size:.76rem;text-transform:uppercase;letter-spacing:.08em;margin:17px 0 9px}
+            .pm-card ul{list-style:none;padding:0;margin:0}
+            .pm-card li{margin:7px 0;font-size:.82rem;line-height:1.45}
+            .pm-card input{accent-color:var(--green)}
+            .pm-deliverable{
+                margin-top:15px;
+                padding:12px;
+                border-left:3px solid var(--green);
+                background:rgba(0,255,150,.035);
+                font-size:.8rem;
+            }
+            .pm-deliverable p{margin:6px 0 0;line-height:1.5;opacity:.8}
+            .pm-mastery{
+                display:flex;
+                flex-wrap:wrap;
+                gap:8px;
+                margin-top:14px;
+                padding-top:13px;
+                border-top:1px solid var(--border);
+                font-size:.72rem;
+            }
+            .pm-projects{
+                margin-top:20px;
+                border:1px solid var(--border);
+                border-radius:16px;
+                padding:20px;
+            }
+            .pm-projects h3{margin:0 0 14px}
+            .pm-project-grid{
+                display:grid;
+                grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+                gap:10px;
+            }
+            .pm-project-grid div{
+                border:1px solid var(--border);
+                border-radius:11px;
+                padding:13px;
+                display:flex;
+                flex-direction:column;
+                gap:5px;
+            }
+            .pm-project-grid b{font-size:.68rem;color:var(--green);letter-spacing:.08em}
+            .pm-project-grid span{font-size:.8rem}
+            .pm-rule{
+                margin-top:16px;
+                padding:16px;
+                border:1px solid var(--border);
+                border-radius:14px;
+                line-height:1.6;
+                font-size:.82rem;
+                opacity:.9;
+            }
+            @media(max-width:650px){
+                .pm-header{flex-direction:column;align-items:flex-start}
+                .pm-grid{grid-template-columns:1fr}
+            }
+        `;
+        document.head.appendChild(pmStyle);
+
+        window.addEventListener("DOMContentLoaded", renderPrincipalUpgrade);
+        if (document.readyState !== "loading") renderPrincipalUpgrade();
+
+        // RENDERING & INTERACTIVITY
+        // ============================================================
+        const container = document.getElementById('curriculum-container');
+        const STORAGE_KEY = 'prto_progress_v1';
+        let completedTopics = new Set(JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'));
+        let totalTopics = 0;
+
+        function generateId(partId, sectionNum, topicIndex) {
+            return `p${partId}-s${sectionNum}-t${topicIndex}`;
+        }
+
+        function renderCurriculum() {
+            totalTopics = 0;
+            let html = '';
+            curriculumData.forEach((part, pIdx) => {
+                const partId = part.id;
+                const partClass = part.optional ? 'part optional' : 'part';
+                const optionalBadge = part.optional ? '<span class="optional-badge">OPTIONAL</span>' : '';
+                html += `
+                    <div class="${partClass}" data-part="${partId}">
+                        <div class="part-header" onclick="togglePart(this)">
+                            <div class="part-num">${String(partId).padStart(2,'0')}</div>
+                            <div class="part-title">
+                                <h2>${part.title}</h2>
+                                <p>${part.subtitle}</p>
+                            </div>
+                            ${optionalBadge}
+                            <div class="part-progress">
+                                <div class="bar"><div class="fill" id="part-fill-${partId}"></div></div>
+                                <span id="part-count-${partId}">0/0</span>
+                            </div>
+                            <span class="arrow">▶</span>
+                        </div>
+                        <div class="part-content">`;
+                part.sections.forEach((section, sIdx) => {
+                    const secKey = `${partId}-${section.num}`;
+                    html += `
+                        <div class="section" data-section="${secKey}">
+                            <div class="section-header" onclick="toggleSection(this)">
+                                <span class="sec-num">${section.num}.</span>
+                                <span class="sec-title">${section.title}</span>
+                                <span class="sec-count">${section.topics.length} topics</span>
+                                <span class="sec-arrow">▶</span>
+                            </div>
+                            <div class="section-content">`;
+                    section.topics.forEach((topic, tIdx) => {
+                        const tId = generateId(partId, section.num, tIdx);
+                        const isComplete = completedTopics.has(tId);
+                        totalTopics++;
+                        html += `
+                            <div class="topic ${isComplete ? 'completed' : ''}" data-topic-id="${tId}">
+                                <input type="checkbox" ${isComplete ? 'checked' : ''} 
+                                    onchange="toggleTopic('${tId}', this)" aria-label="Mark ${topic.n} as complete">
+                                <span class="topic-name">${topic.n}</span>
+                                <a class="topic-link" href="${topic.u}" target="_blank" rel="noopener noreferrer" 
+                                    title="Open ${topic.s} resource">↗ ${topic.s}</a>
+                            </div>`;
+                    });
+                    html += `</div></div>`;
+                });
+                html += `</div></div>`;
+            });
+            container.innerHTML = html;
+            updateAllProgress();
+            // Auto-open first part if nothing completed
+            if (completedTopics.size === 0) {
+                const firstPart = container.querySelector('.part');
+                if (firstPart) firstPart.classList.add('open');
+            }
+            restoreOpenState();
+        }
+
+        function togglePart(el) {
+            const part = el.closest('.part');
+            part.classList.toggle('open');
+            saveOpenState();
+        }
+
+        function toggleSection(el) {
+            const section = el.closest('.section');
+            section.classList.toggle('open');
+            saveOpenState();
+        }
+
+        function toggleTopic(topicId, checkbox) {
+            const topicDiv = checkbox.closest('.topic');
+            if (checkbox.checked) {
+                completedTopics.add(topicId);
+                topicDiv.classList.add('completed');
+            } else {
+                completedTopics.delete(topicId);
+                topicDiv.classList.remove('completed');
+            }
+            localStorage.setItem(STORAGE_KEY, JSON.stringify([...completedTopics]));
+            updateAllProgress();
+        }
+
+        function updateAllProgress() {
+            const completed = completedTopics.size;
+            const pct = totalTopics > 0 ? Math.round((completed / totalTopics) * 100) : 0;
+            document.getElementById('stat-completed').textContent = completed;
+            document.getElementById('stat-total').textContent = totalTopics;
+            document.getElementById('stat-pct').textContent = pct + '%';
+            document.getElementById('ring-text').textContent = pct + '%';
+            const circle = document.getElementById('progress-circle');
+            const circumference = 138.23;
+            const offset = circumference - (pct / 100) * circumference;
+            circle.style.strokeDashoffset = offset;
+            curriculumData.forEach(part => {
+                const partId = part.id;
+                let partTotal = 0;
+                let partDone = 0;
+                part.sections.forEach((section, sIdx) => {
+                    section.topics.forEach((topic, tIdx) => {
+                        const tId = generateId(partId, section.num, tIdx);
+                        partTotal++;
+                        if (completedTopics.has(tId)) partDone++;
+                    });
+                });
+                const fillEl = document.getElementById(`part-fill-${partId}`);
+                const countEl = document.getElementById(`part-count-${partId}`);
+                if (fillEl) fillEl.style.width = partTotal > 0 ? (partDone / partTotal * 100) + '%' : '0%';
+                if (countEl) countEl.textContent = `${partDone}/${partTotal}`;
+            });
+        }
+
+        function expandAll() {
+            document.querySelectorAll('.part').forEach(p => p.classList.add('open'));
+            document.querySelectorAll('.section').forEach(s => s.classList.add('open'));
+            saveOpenState();
+        }
+
+        function collapseAll() {
+            document.querySelectorAll('.part').forEach(p => p.classList.remove('open'));
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('open'));
+            saveOpenState();
+        }
+
+        function resetProgress() {
+            if (confirm('⚠ Reset ALL progress? This will clear every completed topic. Are you sure?')) {
+                completedTopics.clear();
+                localStorage.removeItem(STORAGE_KEY);
+                localStorage.removeItem('prto_open_state');
+                renderCurriculum();
+            }
+        }
+
+        function saveOpenState() {
+            const openParts = [...document.querySelectorAll('.part.open')].map(p => p.dataset.part);
+            const openSections = [...document.querySelectorAll('.section.open')].map(s => s.dataset.section);
+            localStorage.setItem('prto_open_state', JSON.stringify({ parts: openParts, sections: openSections }));
+        }
+
+        function restoreOpenState() {
+            const saved = JSON.parse(localStorage.getItem('prto_open_state') || '{}');
+            if (saved.parts) {
+                saved.parts.forEach(pId => {
+                    const el = document.querySelector(`.part[data-part="${pId}"]`);
+                    if (el) el.classList.add('open');
+                });
+            }
+            if (saved.sections) {
+                saved.sections.forEach(sKey => {
+                    const el = document.querySelector(`.section[data-section="${sKey}"]`);
+                    if (el) el.classList.add('open');
+                });
+            }
+        }
+
+        // Initialize
+        renderCurriculum();
+
+        // Keyboard shortcut: Ctrl+E to expand all, Ctrl+C to collapse all
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.key === 'e') { e.preventDefault();
+                expandAll(); }
+            if (e.ctrlKey && e.key === 'c') { e.preventDefault();
+                collapseAll(); }
+        });
+    </script>
+
+<style>
+/* ============================================================
+   FINAL PRINCIPAL MASTERY SYSTEM
+   Prerequisite graph + capability audit + final gate
+   ============================================================ */
+.pf-wrap{max-width:1400px;margin:0 auto 70px;padding:0 18px}
+.pf-panel{border:1px solid var(--border);border-radius:18px;padding:22px;margin-top:18px;background:rgba(255,255,255,.018)}
+.pf-head{display:flex;justify-content:space-between;gap:18px;align-items:flex-start}
+.pf-head h2,.pf-head h3{margin:0 0 7px}
+.pf-head p{margin:0;opacity:.75;line-height:1.5}
+.pf-pill{border:1px solid var(--green);color:var(--green);border-radius:999px;padding:7px 11px;font-size:.68rem;font-weight:900;letter-spacing:.08em;white-space:nowrap}
+.pf-progress{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:16px}
+.pf-stat{border:1px solid var(--border);border-radius:12px;padding:13px}
+.pf-stat b{display:block;font-size:1.25rem}
+.pf-stat span{font-size:.7rem;opacity:.65}
+.pf-bar{height:8px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden;margin-top:10px}
+.pf-fill{height:100%;width:0;background:var(--green);transition:width .2s}
+.pf-graph{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-top:15px}
+.pf-node{border:1px solid var(--border);border-radius:12px;padding:12px;position:relative}
+.pf-node strong{font-size:.76rem;display:block}
+.pf-node small{font-size:.68rem;opacity:.65;line-height:1.4}
+.pf-node::after{content:"→";position:absolute;right:-9px;top:30%;opacity:.35}
+.pf-node:last-child::after{display:none}
+.pf-gate{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;margin-top:14px}
+.pf-gate label{border:1px solid var(--border);border-radius:10px;padding:11px;font-size:.76rem;display:flex;gap:8px;align-items:flex-start}
+.pf-gate input{margin-top:2px;accent-color:var(--green)}
+.pf-audit{width:100%;border-collapse:collapse;margin-top:14px;font-size:.75rem}
+.pf-audit th,.pf-audit td{border-bottom:1px solid var(--border);padding:10px;text-align:left;vertical-align:top}
+.pf-audit th{font-size:.68rem;text-transform:uppercase;letter-spacing:.06em;opacity:.7}
+.pf-audit input{accent-color:var(--green)}
+.pf-note{margin-top:14px;padding:13px;border-left:3px solid var(--green);background:rgba(0,255,150,.035);font-size:.78rem;line-height:1.55}
+.pf-reset{margin-top:12px;border:1px solid var(--border);background:transparent;color:inherit;border-radius:8px;padding:7px 10px;cursor:pointer}
+@media(max-width:700px){.pf-progress{grid-template-columns:repeat(2,1fr)}.pf-head{flex-direction:column}.pf-node::after{display:none}.pf-audit{font-size:.68rem}}
+</style>
+
+<section class="pf-wrap" id="final-mastery-system">
+  <div class="pf-panel">
+    <div class="pf-head">
+      <div>
+        <div class="pm-kicker">FINAL UPGRADE</div>
+        <h2>Principal Operator Mastery & Capability Audit</h2>
+        <p>This layer does not replace the original roadmap. It adds prerequisites, measurable gates, project evidence, and a final professional-capability audit.</p>
+      </div>
+      <div class="pf-pill">MASTERY GATE</div>
+    </div>
+
+    <div class="pf-progress">
+      <div class="pf-stat"><b id="pf-total">0</b><span>Audit items completed</span></div>
+      <div class="pf-stat"><b id="pf-pct">0%</b><span>Capability audit progress</span></div>
+      <div class="pf-stat"><b id="pf-gates">0/0</b><span>Final gates passed</span></div>
+      <div class="pf-stat"><b id="pf-status">IN PROGRESS</b><span>Current readiness status</span></div>
+    </div>
+    <div class="pf-bar"><div class="pf-fill" id="pf-fill"></div></div>
+  </div>
+
+  <div class="pf-panel">
+    <div class="pf-head">
+      <div>
+        <h3>Prerequisite Graph</h3>
+        <p>Do not rush to advanced operations. Each layer depends on the capability beneath it.</p>
+      </div>
+    </div>
+    <div class="pf-graph">
+      <div class="pf-node"><strong>01 Foundations</strong><small>Systems • networking • security fundamentals</small></div>
+      <div class="pf-node"><strong>02 Systems & Programming</strong><small>Linux • Windows • Python • PowerShell • C basics</small></div>
+      <div class="pf-node"><strong>03 Enterprise Identity</strong><small>AD • Kerberos • LDAP • Entra • attack paths</small></div>
+      <div class="pf-node"><strong>04 Web & Cloud</strong><small>Web architecture • IAM • cloud control planes</small></div>
+      <div class="pf-node"><strong>05 Operator Core</strong><small>Recon • assessment • exploitation concepts • movement</small></div>
+      <div class="pf-node"><strong>06 Engineering & Research</strong><small>Tooling • reverse engineering • vuln research</small></div>
+      <div class="pf-node"><strong>07 Adversary Emulation</strong><small>ATT&amp;CK • campaign design • controlled simulation</small></div>
+      <div class="pf-node"><strong>08 Detection & Purple Team</strong><small>Telemetry • detections • validation • coverage</small></div>
+      <div class="pf-node"><strong>09 Principal</strong><small>Architecture • intelligence • leadership • reporting</small></div>
+      <div class="pf-node"><strong>10 Capstone</strong><small>Integrated enterprise simulation + defense</small></div>
+    </div>
+  </div>
+
+  <div class="pf-panel">
+    <div class="pf-head">
+      <div>
+        <h3>Professional Mastery Gates</h3>
+        <p>A topic is not considered mastered until you can demonstrate it through evidence and repeatable practice in an authorized environment.</p>
+      </div>
+    </div>
+    <div class="pf-gate" id="pf-gates-list">
+      <label><input type="checkbox" class="pf-check"> I can scope an authorized engagement, define objectives, assumptions, RoE, stop conditions, and evidence requirements.</label>
+      <label><input type="checkbox" class="pf-check"> I can reason through enterprise identity and attack paths across AD and hybrid identity environments.</label>
+      <label><input type="checkbox" class="pf-check"> I can analyze cloud identity, permissions, network boundaries, workloads, logging, and attack paths.</label>
+      <label><input type="checkbox" class="pf-check"> I can build and maintain security automation/tooling with tests, documentation, and safe-use boundaries.</label>
+      <label><input type="checkbox" class="pf-check"> I can perform structured reverse-engineering and vulnerability-research work against intentionally vulnerable targets.</label>
+      <label><input type="checkbox" class="pf-check"> I can design and execute ATT&amp;CK-informed adversary simulations in an isolated authorized lab.</label>
+      <label><input type="checkbox" class="pf-check"> I can analyze telemetry and validate whether defensive controls detect simulated behaviors.</label>
+      <label><input type="checkbox" class="pf-check"> I can convert threat intelligence into operational hypotheses and decisions.</label>
+      <label><input type="checkbox" class="pf-check"> I can communicate findings to both technical teams and executive stakeholders.</label>
+      <label><input type="checkbox" class="pf-check"> I can lead a full enterprise simulation from planning through retest and after-action review.</label>
+    </div>
+  </div>
+
+  <div class="pf-panel">
+    <div class="pf-head">
+      <div>
+        <h3>Capability Evidence Audit</h3>
+        <p>Use this as the final “prove it” checklist. Evidence should come from your own authorized labs/projects.</p>
+      </div>
+    </div>
+    <table class="pf-audit">
+      <thead><tr><th>Domain</th><th>Evidence you must produce</th><th>Validated</th></tr></thead>
+      <tbody id="pf-audit-body">
+        <tr><td>Operator Tradecraft</td><td>Engagement plan, scope, assumptions, RoE, safety/stop conditions, after-action review</td><td><input type="checkbox" class="pf-check"></td></tr>
+        <tr><td>Identity / AD</td><td>Architecture map, identity attack-path analysis, lab findings, remediation validation</td><td><input type="checkbox" class="pf-check"></td></tr>
+        <tr><td>Cloud</td><td>Cloud architecture map, IAM analysis, attack-path report, telemetry/remediation validation</td><td><input type="checkbox" class="pf-check"></td></tr>
+        <tr><td>Engineering</td><td>Original security tool, tests, documentation, threat model, demo</td><td><input type="checkbox" class="pf-check"></td></tr>
+        <tr><td>Research</td><td>Vulnerability/reverse-engineering case study with reproducible lab evidence and remediation</td><td><input type="checkbox" class="pf-check"></td></tr>
+        <tr><td>Adversary Emulation</td><td>ATT&amp;CK-informed plan, controlled execution record, evidence, and lessons learned</td><td><input type="checkbox" class="pf-check"></td></tr>
+        <tr><td>Detection / Purple Team</td><td>Telemetry analysis, detection hypotheses/rules, validation results, coverage assessment</td><td><input type="checkbox" class="pf-check"></td></tr>
+        <tr><td>Threat Intelligence</td><td>Intelligence brief, confidence assessment, operational hypotheses, decision impact</td><td><input type="checkbox" class="pf-check"></td></tr>
+        <tr><td>Leadership / Reporting</td><td>Technical report, executive briefing, risk prioritization, strategic recommendations</td><td><input type="checkbox" class="pf-check"></td></tr>
+        <tr><td>Principal Capstone</td><td>Full enterprise simulation package, retest, after-action review, final defense</td><td><input type="checkbox" class="pf-check"></td></tr>
+      </tbody>
+    </table>
+    <div class="pf-note">
+      <strong>Readiness rule:</strong> “100%” here means you completed the evidence audit inside this tracker.
+      It does not grant a job title or prove real-world expertise. Professional readiness still depends on the quality,
+      difficulty, repeatability, and independent review of your work. Practice only on systems you own or are explicitly authorized to test.
+    </div>
+    <button class="pf-reset" id="pf-reset">Reset final audit only</button>
+  </div>
+</section>
+
+<script>
+(function(){
+  const key = "principal_final_mastery_v2";
+  const checks = Array.from(document.querySelectorAll("#final-mastery-system .pf-check"));
+  const saved = JSON.parse(localStorage.getItem(key) || "[]");
+
+  checks.forEach((c,i)=>{
+    c.checked = !!saved[i];
+    c.addEventListener("change", save);
+  });
+
+  function save(){
+    localStorage.setItem(key, JSON.stringify(checks.map(c=>c.checked)));
+    update();
+  }
+
+  function update(){
+    const done = checks.filter(c=>c.checked).length;
+    const pct = checks.length ? Math.round(done/checks.length*100) : 0;
+    const gateChecks = Array.from(document.querySelectorAll("#pf-gates-list .pf-check"));
+    const gates = gateChecks.filter(c=>c.checked).length;
+    document.getElementById("pf-total").textContent = done;
+    document.getElementById("pf-pct").textContent = pct + "%";
+    document.getElementById("pf-gates").textContent = gates + "/" + gateChecks.length;
+    document.getElementById("pf-fill").style.width = pct + "%";
+    document.getElementById("pf-status").textContent =
+      pct === 100 ? "AUDIT COMPLETE" : (pct >= 80 ? "ADVANCED" : (pct >= 50 ? "BUILDING" : "IN PROGRESS"));
+  }
+  document.getElementById("pf-reset").addEventListener("click", ()=>{
+    checks.forEach(c=>c.checked=false);
+    localStorage.removeItem(key);
+    update();
+  });
+  update();
+})();
+</script>
+
+</body>
+</html>
