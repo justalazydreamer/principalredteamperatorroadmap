@@ -6,27 +6,35 @@
     <title>Principal Red Team Operator — Interactive Roadmap (Cyberpunk Edition)</title>
     <style>
         :root {
-            --bg: #0a0a0a;
-            --bg2: #0d1117;
-            --card: #111518;
-            --border: #1e3a2a;
-            --green: #00ff41;
-            --green-dim: #00cc33;
-            --blue: #0a3a5a;
-            --blue-light: #1a6a9a;
-            --text: #c5d1c5;
-            --text-dim: #7a8a7a;
-            --accent: #00ff41;
-            --warning: #ffaa00;
-            --danger: #ff4444;
-            --optional: #ff00ff;
-            --font: 'Consolas', 'Monaco', 'Courier New', monospace;
+            --bg: #060607;
+            --bg2: #0c0c0f;
+            --card: #121215;
+            --card-hover: #17171b;
+            --border: #232328;
+            --border-light: #2e2e34;
+            --accent: #e0202f;
+            --accent-dim: #8f1420;
+            --accent-glow: rgba(224, 32, 47, 0.35);
+            --purple: #a78bfa;
+            --foundation: #93a0b3;
+            --optional: #ec4899;
+            --blue: #38414f;
+            --blue-light: #8fa3bd;
+            --text: #e9e9ec;
+            --text-dim: #93939c;
+            --text-mute: #55555e;
+            --danger: #ff4d4d;
+            --warning: #f5a524;
+            --done: #37c968;
+            --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+            --font-display: 'Arial Black', -apple-system, 'Segoe UI', sans-serif;
         }
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
+        html { scroll-behavior: smooth; }
         body {
             background: var(--bg);
             color: var(--text);
@@ -37,604 +45,530 @@
             overflow-x: hidden;
             position: relative;
         }
-        /* Animated grid background */
+        /* Faint grid + red glow ambience */
         body::before {
             content: '';
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            inset: 0;
             background-image:
-                linear-gradient(rgba(0, 255, 65, 0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 255, 65, 0.03) 1px, transparent 1px);
-            background-size: 40px 40px;
+                linear-gradient(rgba(224, 32, 47, 0.035) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(224, 32, 47, 0.035) 1px, transparent 1px);
+            background-size: 44px 44px;
             z-index: -2;
             pointer-events: none;
         }
-        /* Scanline overlay */
-        body::after {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: repeating-linear-gradient(
-                0deg,
-                transparent 0px,
-                transparent 2px,
-                rgba(0, 0, 0, 0.08) 2px,
-                rgba(0, 0, 0, 0.08) 4px
-            );
-            z-index: 9999;
-            pointer-events: none;
-            animation: scanline 8s linear infinite;
-        }
-        @keyframes scanline {
-            0% { transform: translateY(0); }
-            100% { transform: translateY(100vh); }
-        }
-        /* Optional radial glows */
         .glow-top {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(ellipse at 50% -20%, rgba(10, 58, 90, 0.3) 0%, transparent 60%),
-                radial-gradient(ellipse at 80% 100%, rgba(0, 255, 65, 0.05) 0%, transparent 50%);
+            inset: 0;
+            background:
+                radial-gradient(ellipse 900px 500px at 78% -8%, rgba(224, 32, 47, 0.16) 0%, transparent 60%),
+                radial-gradient(ellipse 600px 400px at 0% 100%, rgba(224, 32, 47, 0.06) 0%, transparent 55%);
             z-index: -1;
             pointer-events: none;
         }
-        /* Scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: var(--bg2);
-        }
-        ::-webkit-scrollbar-thumb {
-            background: var(--border);
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: var(--green-dim);
-        }
-        /* Header */
-        header {
-            position: sticky;
+        ::-webkit-scrollbar { width: 9px; height: 9px; }
+        ::-webkit-scrollbar-track { background: var(--bg2); }
+        ::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 5px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--accent-dim); }
+
+        /* ============ SIDEBAR ============ */
+        .sidebar {
+            width: 220px;
+            height: 100vh;
+            position: fixed;
             top: 0;
-            background: rgba(10, 10, 10, 0.92);
-            backdrop-filter: blur(12px);
-            border-bottom: 2px solid var(--border);
-            padding: 18px 28px;
-            z-index: 100;
+            left: 0;
+            background: linear-gradient(180deg, #0a0a0c 0%, #08080a 100%);
+            border-right: 1px solid var(--border);
             display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            justify-content: space-between;
-            gap: 14px;
-            box-shadow: 0 0 30px rgba(0, 255, 65, 0.1);
+            flex-direction: column;
+            padding: 26px 16px;
+            z-index: 50;
+            overflow-y: auto;
         }
-        .header-left h1 {
-            font-size: 1.5rem;
-            color: var(--green);
-            text-shadow: 0 0 20px rgba(0, 255, 65, 0.6), 0 0 40px rgba(0, 255, 65, 0.3);
-            letter-spacing: 2px;
-            font-weight: 700;
-            position: relative;
-            display: inline-block;
-            animation: glitch 3s infinite;
-        }
-        @keyframes glitch {
-            0%, 100% { text-shadow: 0 0 20px rgba(0,255,65,0.6), 0 0 40px rgba(0,255,65,0.3); }
-            95% { text-shadow: 0 0 20px rgba(0,255,65,0.6), 0 0 40px rgba(0,255,65,0.3); }
-            96% { text-shadow: -2px 0 #ff00ff, 2px 0 #00ffff; }
-            97% { text-shadow: 2px 0 #ff00ff, -2px 0 #00ffff; }
-            98% { text-shadow: -2px 0 #ff00ff, 2px 0 #00ffff; }
-            99% { text-shadow: 2px 0 #ff00ff, -2px 0 #00ffff; }
-        }
-        .header-left p {
-            font-size: 0.75rem;
-            color: var(--text-dim);
-            letter-spacing: 0.5px;
-        }
-        .header-right {
+        .brand {
             display: flex;
             align-items: center;
-            gap: 16px;
-            flex-wrap: wrap;
+            gap: 10px;
+            padding: 6px 8px 26px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 18px;
         }
-        .progress-ring {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            border: 3px solid var(--border);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.7rem;
-            color: var(--green);
+        .brand svg { width: 34px; height: 34px; filter: drop-shadow(0 0 10px var(--accent-glow)); flex-shrink: 0; }
+        .brand-text { font-family: var(--font-display); font-size: 0.95rem; letter-spacing: 1px; color: var(--accent); text-transform: uppercase; line-height: 1.15; }
+        .nav-list { list-style: none; display: flex; flex-direction: column; gap: 3px; flex: 1; }
+        .nav-item {
+            display: flex; align-items: center; gap: 12px;
+            padding: 10px 12px; border-radius: 8px; cursor: pointer;
+            color: var(--text-dim); font-size: 0.78rem; font-weight: 600;
+            letter-spacing: 0.4px; text-transform: uppercase; user-select: none;
+            transition: all 0.2s ease; border-left: 3px solid transparent;
+        }
+        .nav-item svg { width: 17px; height: 17px; flex-shrink: 0; opacity: 0.85; }
+        .nav-item:hover { background: rgba(255,255,255,0.03); color: var(--text); }
+        .nav-item.active {
+            background: linear-gradient(90deg, rgba(224,32,47,0.16), rgba(224,32,47,0.02));
+            color: #fff; border-left-color: var(--accent);
+        }
+        .sidebar-quote {
+            margin-top: 18px; padding: 14px 10px 4px;
+            border-top: 1px solid var(--border);
+            font-size: 0.68rem; font-style: italic; color: var(--text-mute);
+            line-height: 1.55; text-align: center;
+        }
+
+        /* ============ MAIN WRAP ============ */
+        .main-wrap { margin-left: 220px; position: relative; z-index: 1; }
+
+        /* ============ HERO ============ */
+        .hero {
             position: relative;
-            box-shadow: 0 0 15px rgba(0, 255, 65, 0.2);
+            padding: 34px 36px 26px;
+            overflow: hidden;
+            border-bottom: 1px solid var(--border);
+            background:
+                radial-gradient(ellipse 700px 300px at 85% 0%, rgba(224,32,47,0.14), transparent 65%),
+                linear-gradient(180deg, #0b0b0d 0%, #08080a 100%);
         }
-        .progress-ring svg {
-            position: absolute;
-            top: -3px;
-            left: -3px;
-            transform: rotate(-90deg);
+        .hero-bat {
+            position: absolute; top: -10px; right: 28px; width: 220px; height: 220px;
+            opacity: 0.06; pointer-events: none;
         }
-        .progress-ring circle {
-            fill: none;
-            stroke: var(--green);
-            stroke-width: 3;
-            stroke-dasharray: 138.2;
-            stroke-dashoffset: 138.2;
-            transition: stroke-dashoffset 0.5s ease;
-            filter: drop-shadow(0 0 6px var(--green));
+        .hero-kicker {
+            font-size: 0.72rem; font-weight: 800; letter-spacing: 3px;
+            color: var(--accent); text-transform: uppercase; margin-bottom: 6px;
         }
-        .progress-ring span {
-            position: relative;
-            z-index: 1;
-            font-weight: bold;
-            font-size: 0.65rem;
+        .menu-btn {
+            display: none; align-items: center; justify-content: center;
+            width: 36px; height: 36px; border-radius: 8px;
+            background: var(--card); border: 1px solid var(--border);
+            color: var(--text); cursor: pointer; margin-bottom: 14px;
         }
-        .stats {
-            display: flex;
-            gap: 12px;
-            font-size: 0.7rem;
-            color: var(--text-dim);
+        .menu-btn svg { width: 18px; height: 18px; }
+        .hero h1 {
+            font-family: var(--font-display);
+            font-size: 2.5rem; letter-spacing: 1px; text-transform: uppercase;
+            color: #f4f4f6; line-height: 1.05; font-weight: 900;
         }
-        .stats b {
-            color: var(--green);
-            font-size: 0.85rem;
+        .hero-sub {
+            margin-top: 8px; font-size: 0.82rem; color: var(--text-dim);
+            letter-spacing: 0.5px; text-transform: uppercase; font-weight: 600;
         }
-        .btn {
-            background: transparent;
+        .hero-quote {
+            position: absolute; top: 34px; right: 36px; max-width: 260px;
+            text-align: right; font-size: 0.72rem; font-style: italic;
+            color: var(--text-mute); line-height: 1.5;
+        }
+        .hero-quote span { display: block; margin-top: 4px; color: var(--accent-dim); font-style: normal; font-weight: 700; letter-spacing: 0.5px; }
+
+        /* ============ STAT BAR ============ */
+        .stat-bar {
+            display: grid;
+            grid-template-columns: 1.1fr 1fr 1fr 1.2fr;
+            gap: 0;
+            margin: 20px 36px 0;
+            background: var(--card);
             border: 1px solid var(--border);
-            color: var(--text);
-            padding: 6px 12px;
+            border-radius: 14px;
+            overflow: hidden;
+        }
+        .stat-cell {
+            padding: 18px 22px;
+            display: flex; align-items: center; gap: 14px;
+            border-right: 1px solid var(--border);
+        }
+        .stat-cell:last-child { border-right: none; }
+        .stat-label {
+            font-size: 0.62rem; font-weight: 800; letter-spacing: 1.2px;
+            color: var(--text-mute); text-transform: uppercase; margin-bottom: 4px;
+        }
+        .stat-value { font-size: 1.5rem; font-weight: 900; color: #fff; line-height: 1.1; }
+        .stat-sub { font-size: 0.72rem; color: var(--text-dim); margin-top: 2px; }
+        .stat-icon-box {
+            width: 40px; height: 40px; border-radius: 10px; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            background: rgba(224,32,47,0.1); border: 1px solid rgba(224,32,47,0.25);
+            color: var(--accent);
+        }
+        .stat-icon-box svg { width: 20px; height: 20px; }
+
+        .ring-wrap { position: relative; width: 54px; height: 54px; flex-shrink: 0; }
+        .ring-wrap svg { transform: rotate(-90deg); }
+        .ring-wrap .bg-ring { fill: none; stroke: var(--border-light); stroke-width: 4; }
+        .ring-wrap .fg-ring { fill: none; stroke: var(--accent); stroke-width: 4; stroke-linecap: round; filter: drop-shadow(0 0 5px var(--accent-glow)); transition: stroke-dashoffset 0.5s ease; }
+        .ring-wrap .ring-label {
+            position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+            font-size: 0.72rem; font-weight: 800; color: #fff;
+        }
+        .mini-bar { width: 100%; height: 5px; background: var(--bg2); border-radius: 3px; overflow: hidden; margin-top: 6px; border: 1px solid var(--border); }
+        .mini-bar .fill { height: 100%; background: linear-gradient(90deg, var(--accent-dim), var(--accent)); border-radius: 3px; transition: width 0.4s ease; }
+
+        /* ============ CONTROLS ROW ============ */
+        main.content-area { padding: 26px 36px 70px; }
+        .disclaimer {
+            background: rgba(224, 32, 47, 0.06);
+            border: 1px solid rgba(224, 32, 47, 0.25);
+            border-left: 4px solid var(--accent);
+            padding: 14px 18px;
+            margin-bottom: 22px;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            color: #d9c8ca;
+        }
+        .disclaimer b { color: var(--accent); }
+
+        .section-toolbar {
+            display: flex; align-items: center; justify-content: space-between;
+            flex-wrap: wrap; gap: 12px; margin-bottom: 18px;
+        }
+        .toolbar-title {
+            display: flex; align-items: center; gap: 10px;
+            font-size: 0.8rem; font-weight: 800; letter-spacing: 2px;
+            color: var(--text-dim); text-transform: uppercase;
+        }
+        .toolbar-title .chev { color: var(--accent); font-weight: 900; }
+        .toolbar-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .filter-group { display: flex; background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 3px; }
+        .filter-btn {
+            background: transparent; border: none; color: var(--text-dim);
+            font-family: var(--font); font-size: 0.68rem; font-weight: 700;
+            letter-spacing: 0.8px; text-transform: uppercase; padding: 7px 14px;
+            border-radius: 6px; cursor: pointer; transition: all 0.2s ease;
+        }
+        .filter-btn.active { background: var(--accent); color: #fff; }
+        .filter-btn:not(.active):hover { color: var(--text); }
+        .view-toggle { display: flex; background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 3px; gap: 2px; }
+        .view-btn {
+            background: transparent; border: none; color: var(--text-dim);
+            width: 32px; height: 30px; border-radius: 6px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s ease;
+        }
+        .view-btn svg { width: 15px; height: 15px; }
+        .view-btn.active { background: var(--accent); color: #fff; }
+        .btn {
+            background: var(--card);
+            border: 1px solid var(--border);
+            color: var(--text-dim);
+            padding: 8px 14px;
             cursor: pointer;
             font-family: var(--font);
-            font-size: 0.7rem;
-            border-radius: 4px;
-            transition: all 0.3s ease;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-        }
-        .btn:hover {
-            border-color: var(--green);
-            color: var(--green);
-            box-shadow: 0 0 12px rgba(0, 255, 65, 0.3);
-        }
-        .btn.danger:hover {
-            border-color: var(--danger);
-            color: var(--danger);
-            box-shadow: 0 0 12px rgba(255, 68, 68, 0.3);
-        }
-        /* Main */
-        main {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 24px 20px 60px;
-            position: relative;
-            z-index: 1;
-        }
-        /* Disclaimer */
-        .disclaimer {
-            background: rgba(255, 68, 68, 0.08);
-            border: 1px solid rgba(255, 68, 68, 0.3);
-            border-left: 4px solid var(--danger);
-            padding: 14px 18px;
-            margin-bottom: 20px;
-            border-radius: 6px;
-            font-size: 0.75rem;
-            color: #ffcccc;
-            box-shadow: 0 0 20px rgba(255, 68, 68, 0.1);
-        }
-        .disclaimer b {
-            color: var(--danger);
-        }
-        /* Part container */
-        .part {
-            margin-bottom: 20px;
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            overflow: hidden;
-            background: rgba(17, 21, 24, 0.85);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-            transition: border-color 0.3s ease, box-shadow 0.3s ease;
-            position: relative;
-        }
-        .part:hover {
-            border-color: rgba(0, 255, 65, 0.4);
-            box-shadow: 0 0 30px rgba(0, 255, 65, 0.15);
-        }
-        .part.optional {
-            border-color: var(--optional) !important;
-            box-shadow: 0 0 20px rgba(255, 0, 255, 0.2);
-        }
-        .part.optional:hover {
-            box-shadow: 0 0 30px rgba(255, 0, 255, 0.3);
-            border-color: #ff66ff !important;
-        }
-        .part-header {
-            padding: 16px 22px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            user-select: none;
-            transition: background 0.3s ease;
-            background: rgba(0, 0, 0, 0.3);
-            border-bottom: 1px solid transparent;
-        }
-        .part-header:hover {
-            background: rgba(0, 255, 65, 0.04);
-        }
-        .part.optional .part-header:hover {
-            background: rgba(255, 0, 255, 0.04);
-        }
-        .part-header .part-num {
-            font-size: 1.6rem;
-            font-weight: 900;
-            color: var(--green);
-            text-shadow: 0 0 15px rgba(0, 255, 65, 0.5);
-            min-width: 44px;
-            text-align: center;
-        }
-        .part.optional .part-header .part-num {
-            color: var(--optional);
-            text-shadow: 0 0 15px rgba(255, 0, 255, 0.5);
-        }
-        .part-header .part-title {
-            flex: 1;
-        }
-        .part-header .part-title h2 {
-            font-size: 1.05rem;
-            color: var(--green);
-            letter-spacing: 1px;
-            text-transform: uppercase;
+            font-size: 0.68rem;
             font-weight: 700;
-        }
-        .part.optional .part-header .part-title h2 {
-            color: var(--optional);
-        }
-        .part-header .part-title p {
-            font-size: 0.7rem;
-            color: var(--text-dim);
-            letter-spacing: 0.5px;
-        }
-        .part-header .optional-badge {
-            background: rgba(255, 0, 255, 0.2);
-            border: 1px solid var(--optional);
-            color: var(--optional);
-            font-size: 0.55rem;
-            padding: 2px 8px;
-            border-radius: 10px;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            font-weight: bold;
-        }
-        .part-header .part-progress {
-            font-size: 0.7rem;
-            color: var(--text-dim);
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .part-header .part-progress .bar {
-            width: 80px;
-            height: 6px;
-            background: var(--bg2);
-            border-radius: 3px;
-            overflow: hidden;
-            border: 1px solid var(--border);
-        }
-        .part.optional .part-header .part-progress .bar {
-            border-color: var(--optional);
-        }
-        .part-header .part-progress .bar .fill {
-            height: 100%;
-            background: var(--green);
-            border-radius: 3px;
-            transition: width 0.4s ease;
-            box-shadow: 0 0 8px rgba(0, 255, 65, 0.5);
-        }
-        .part.optional .part-header .part-progress .bar .fill {
-            background: var(--optional);
-            box-shadow: 0 0 8px rgba(255, 0, 255, 0.5);
-        }
-        .part-header .arrow {
-            font-size: 1.1rem;
-            color: var(--green);
-            transition: transform 0.3s ease;
-        }
-        .part.optional .part-header .arrow {
-            color: var(--optional);
-        }
-        .part.open .part-header .arrow {
-            transform: rotate(90deg);
-        }
-        .part.open .part-header {
-            border-bottom-color: var(--border);
-        }
-        .part-content {
-            display: none;
-            padding: 14px 18px 18px;
-        }
-        .part.open .part-content {
-            display: block;
-        }
-        /* Section card */
-        .section {
-            border: 1px solid rgba(0, 255, 65, 0.12);
             border-radius: 8px;
-            margin-bottom: 12px;
-            background: rgba(10, 10, 10, 0.6);
-            overflow: hidden;
-            transition: border-color 0.3s ease;
+            transition: all 0.2s ease;
+            letter-spacing: 0.6px;
+            text-transform: uppercase;
         }
-        .part.optional .section {
-            border: 1px solid rgba(255, 0, 255, 0.2);
+        .btn:hover { border-color: var(--accent); color: var(--accent); }
+        .btn.danger:hover { border-color: var(--danger); color: var(--danger); }
+
+        /* ============ ROADMAP GRID ============ */
+        .roadmap-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(225px, 1fr));
+            gap: 16px;
         }
-        .section:hover {
-            border-color: rgba(0, 255, 65, 0.25);
-        }
-        .part.optional .section:hover {
-            border-color: rgba(255, 0, 255, 0.4);
-        }
-        .section-header {
-            padding: 10px 16px;
+        .roadmap-grid.list-view { grid-template-columns: 1fr; }
+
+        .part {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            user-select: none;
-            background: rgba(0, 255, 65, 0.03);
-            transition: background 0.3s ease;
-        }
-        .part.optional .section-header {
-            background: rgba(255, 0, 255, 0.03);
-        }
-        .section-header:hover {
-            background: rgba(0, 255, 65, 0.06);
-        }
-        .part.optional .section-header:hover {
-            background: rgba(255, 0, 255, 0.06);
-        }
-        .section-header .sec-num {
-            font-size: 0.75rem;
-            font-weight: 900;
-            color: var(--blue-light);
-            min-width: 34px;
-            letter-spacing: 1px;
-        }
-        .part.optional .section-header .sec-num {
-            color: #cc66cc;
-        }
-        .section-header .sec-title {
-            flex: 1;
-            font-weight: 600;
-            color: #dde;
-            font-size: 0.85rem;
-            letter-spacing: 0.3px;
-        }
-        .section-header .sec-count {
-            font-size: 0.65rem;
-            color: var(--text-dim);
-        }
-        .section-header .sec-arrow {
-            font-size: 0.8rem;
-            color: var(--green);
-            transition: transform 0.3s ease;
-        }
-        .part.optional .section-header .sec-arrow {
-            color: var(--optional);
-        }
-        .section.open .section-header .sec-arrow {
-            transform: rotate(90deg);
-        }
-        .section-content {
-            display: none;
-            padding: 6px 12px 12px;
-        }
-        .section.open .section-content {
-            display: block;
-        }
-        /* Topic item */
-        .topic {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 6px 8px;
-            border-radius: 6px;
-            transition: background 0.25s ease;
-            cursor: pointer;
-        }
-        .topic:hover {
-            background: rgba(0, 255, 65, 0.04);
-        }
-        .part.optional .topic:hover {
-            background: rgba(255, 0, 255, 0.04);
-        }
-        .topic input[type="checkbox"] {
-            appearance: none;
-            -webkit-appearance: none;
-            width: 18px;
-            height: 18px;
-            border: 2px solid var(--border);
-            border-radius: 4px;
-            cursor: pointer;
+            transition: border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
             position: relative;
-            transition: all 0.3s ease;
-            flex-shrink: 0;
-            background: rgba(0, 0, 0, 0.5);
+            overflow: hidden;
         }
-        .topic input[type="checkbox"]:hover {
-            border-color: var(--green-dim);
-            box-shadow: 0 0 8px rgba(0, 255, 65, 0.2);
+        .part:hover { border-color: var(--border-light); background: var(--card-hover); }
+        .part.open {
+            grid-column: 1 / -1;
+            cursor: default;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 1px var(--accent-glow), 0 10px 30px rgba(0,0,0,0.5);
         }
-        .part.optional .topic input[type="checkbox"]:hover {
-            border-color: var(--optional);
-            box-shadow: 0 0 8px rgba(255, 0, 255, 0.2);
+        .part.optional { border-color: rgba(236, 72, 153, 0.35); }
+        .part.optional:hover { border-color: rgba(236, 72, 153, 0.55); }
+        .part.optional.open { border-color: var(--optional); box-shadow: 0 0 0 1px rgba(236,72,153,0.35), 0 10px 30px rgba(0,0,0,0.5); }
+        .part.filtered-out { display: none; }
+
+        .part-header { padding: 20px 20px 18px; }
+        .part-face-top { display: flex; align-items: flex-start; justify-content: space-between; }
+        .part-num-tag { font-size: 0.62rem; font-weight: 800; letter-spacing: 1.5px; color: var(--text-mute); text-transform: uppercase; }
+        .badge {
+            font-size: 0.56rem; font-weight: 800; letter-spacing: 1px;
+            padding: 3px 8px; border-radius: 20px; text-transform: uppercase;
+            border: 1px solid transparent; white-space: nowrap;
         }
-        .topic input[type="checkbox"]:checked {
-            background: var(--green);
-            border-color: var(--green);
-            box-shadow: 0 0 12px rgba(0, 255, 65, 0.4);
+        .badge.foundation { color: var(--foundation); border-color: rgba(147,160,179,0.4); background: rgba(147,160,179,0.08); }
+        .badge.core { color: #fff; background: var(--accent); }
+        .badge.advanced { color: #fff; background: var(--purple); }
+        .badge.optional-b { color: #fff; background: var(--optional); }
+
+        .part-icon {
+            width: 52px; height: 52px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            background: rgba(224,32,47,0.08); border: 1px solid rgba(224,32,47,0.22);
+            color: var(--accent); margin: 14px 0 16px;
+            transition: transform 0.25s ease;
         }
-        .part.optional .topic input[type="checkbox"]:checked {
-            background: var(--optional);
-            border-color: var(--optional);
-            box-shadow: 0 0 12px rgba(255, 0, 255, 0.4);
+        .part.optional .part-icon { background: rgba(236,72,153,0.08); border-color: rgba(236,72,153,0.25); color: var(--optional); }
+        .part-icon svg { width: 26px; height: 26px; }
+        .part:hover .part-icon { transform: scale(1.06); }
+
+        .part-title { font-size: 1rem; font-weight: 800; letter-spacing: 0.3px; color: #fff; text-transform: uppercase; line-height: 1.25; margin-bottom: 4px; }
+        .part-subtitle { font-size: 0.72rem; color: var(--text-dim); line-height: 1.4; margin-bottom: 14px; min-height: 0; }
+
+        .part-progress-row { display: flex; flex-direction: column; gap: 6px; margin-top: 2px; }
+        .pct-line { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+        .part-pct { font-size: 0.85rem; font-weight: 900; color: var(--accent); }
+        .part.optional .part-pct { color: var(--optional); }
+        .part-count-label { font-size: 0.65rem; color: var(--text-mute); }
+        .part-bar { width: 100%; height: 6px; background: var(--bg2); border-radius: 3px; overflow: hidden; border: 1px solid var(--border); }
+        .part-bar .fill { height: 100%; background: linear-gradient(90deg, var(--accent-dim), var(--accent)); border-radius: 3px; transition: width 0.4s ease; }
+        .part.optional .part-bar .fill { background: linear-gradient(90deg, #a3175f, var(--optional)); }
+
+        /* OPEN STATE — header becomes a horizontal strip */
+        .part.open .part-header { display: flex; align-items: center; gap: 18px; padding: 18px 24px; border-bottom: 1px solid var(--border); }
+        .part.open .part-face-top { display: contents; }
+        .part.open .part-num-tag { order: 0; }
+        .part.open .part-icon { margin: 0; width: 44px; height: 44px; flex-shrink: 0; }
+        .part.open .part-icon svg { width: 22px; height: 22px; }
+        .part.open .part-title-wrap { flex: 1; min-width: 160px; }
+        .part.open .part-title { font-size: 1.05rem; margin-bottom: 2px; }
+        .part.open .part-subtitle { margin-bottom: 0; }
+        .part.open .part-progress-row { align-items: flex-end; gap: 4px; min-width: 140px; }
+        .part.open .part-bar { width: 140px; }
+        .part-arrow { display: none; color: var(--text-mute); font-size: 0.9rem; transition: transform 0.3s ease; flex-shrink: 0; }
+        .part.open .part-arrow { display: block; transform: rotate(90deg); color: var(--accent); }
+
+        .part-content { display: none; padding: 16px 20px 20px; }
+        .part.open .part-content { display: block; }
+
+        /* Closed card: hide elements meant only for open row layout */
+        .part:not(.open) .part-title-wrap { display: contents; }
+
+        /* ============ SECTION / TOPIC ============ */
+        .section {
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            margin-bottom: 10px;
+            background: var(--bg2);
+            overflow: hidden;
+            transition: border-color 0.25s ease;
         }
+        .section:hover { border-color: var(--border-light); }
+        .section-header {
+            padding: 11px 16px; cursor: pointer; display: flex; align-items: center; gap: 10px;
+            user-select: none; transition: background 0.2s ease;
+        }
+        .section-header:hover { background: rgba(255,255,255,0.02); }
+        .section-header .sec-num { font-size: 0.72rem; font-weight: 800; color: var(--accent); min-width: 26px; }
+        .part.optional .section-header .sec-num { color: var(--optional); }
+        .section-header .sec-title { flex: 1; font-weight: 700; color: #dcdce0; font-size: 0.84rem; letter-spacing: 0.2px; }
+        .section-header .sec-count { font-size: 0.63rem; color: var(--text-mute); }
+        .section-header .sec-arrow { font-size: 0.75rem; color: var(--text-mute); transition: transform 0.25s ease; }
+        .section.open .section-header .sec-arrow { transform: rotate(90deg); color: var(--accent); }
+        .section-content { display: none; padding: 4px 12px 12px; }
+        .section.open .section-content { display: block; }
+
+        .topic { display: flex; align-items: center; gap: 10px; padding: 7px 8px; border-radius: 6px; transition: background 0.2s ease; flex-wrap: wrap; }
+        .topic:hover { background: rgba(224,32,47,0.04); }
+        .topic input[type="checkbox"] {
+            appearance: none; -webkit-appearance: none;
+            width: 18px; height: 18px; border: 2px solid var(--border-light);
+            border-radius: 5px; cursor: pointer; position: relative;
+            transition: all 0.2s ease; flex-shrink: 0; background: var(--bg);
+        }
+        .topic input[type="checkbox"]:hover { border-color: var(--accent); }
+        .topic input[type="checkbox"]:checked { background: var(--done); border-color: var(--done); }
         .topic input[type="checkbox"]:checked::after {
-            content: '✓';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: #000;
-            font-size: 11px;
-            font-weight: 900;
+            content: '✓'; position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%); color: #061006; font-size: 11px; font-weight: 900;
         }
-        .topic .topic-name {
-            font-size: 0.78rem;
-            color: var(--text);
-            letter-spacing: 0.2px;
-            flex: 1;
-        }
+        .topic .topic-name { font-size: 0.79rem; color: var(--text); flex: 1; }
         .topic .topic-link {
-            font-size: 0.7rem;
-            color: var(--blue-light);
-            text-decoration: none;
-            padding: 3px 8px;
-            border: 1px solid rgba(26, 106, 154, 0.3);
-            border-radius: 4px;
-            transition: all 0.3s ease;
-            white-space: nowrap;
-            letter-spacing: 0.3px;
+            font-size: 0.68rem; color: var(--blue-light); text-decoration: none;
+            padding: 3px 9px; border: 1px solid var(--border-light); border-radius: 20px;
+            transition: all 0.2s ease; white-space: nowrap;
         }
-        .topic .topic-link:hover {
-            background: rgba(26, 106, 154, 0.15);
-            border-color: var(--blue-light);
-            color: #5ab8e8;
-            box-shadow: 0 0 8px rgba(26, 106, 154, 0.3);
+        .topic .topic-link:hover { background: rgba(224,32,47,0.1); border-color: var(--accent); color: #fff; }
+        .topic.completed .topic-name { text-decoration: line-through; color: var(--text-mute); }
+
+        /* ============ RESPONSIVE ============ */
+        @media (max-width: 980px) {
+            .sidebar { left: -240px; transition: left 0.25s ease; box-shadow: 0 0 40px rgba(0,0,0,0.6); }
+            .sidebar.open { left: 0; }
+            .main-wrap { margin-left: 0; }
+            .menu-btn { display: flex !important; }
+            .stat-bar { grid-template-columns: 1fr 1fr; }
+            .stat-cell:nth-child(3), .stat-cell:nth-child(4) { border-top: 1px solid var(--border); }
         }
-        .part.optional .topic .topic-link {
-            color: #cc66cc;
-            border-color: rgba(204, 102, 204, 0.3);
-        }
-        .part.optional .topic .topic-link:hover {
-            background: rgba(204, 102, 204, 0.15);
-            border-color: #cc66cc;
-            color: #ff99ff;
-            box-shadow: 0 0 8px rgba(204, 102, 204, 0.3);
-        }
-        .topic.completed .topic-name {
-            text-decoration: line-through;
-            color: var(--text-dim);
-        }
-        /* Responsive */
         @media (max-width: 700px) {
-            header {
-                padding: 12px 16px;
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            .header-left h1 {
-                font-size: 1.1rem;
-            }
-            .part-header {
-                padding: 12px 14px;
-                gap: 8px;
-            }
-            .part-header .part-num {
-                font-size: 1.2rem;
-                min-width: 30px;
-            }
-            .part-header .part-title h2 {
-                font-size: 0.85rem;
-            }
-            .section-header {
-                padding: 8px 10px;
-            }
-            .topic {
-                flex-wrap: wrap;
-                gap: 6px;
-            }
-            .topic .topic-link {
-                font-size: 0.65rem;
-                padding: 2px 6px;
-            }
-            main {
-                padding: 12px 10px 40px;
-            }
-            .stats {
-                font-size: 0.6rem;
-            }
-            .stats b {
-                font-size: 0.7rem;
-            }
+            .hero { padding: 22px 18px 18px; }
+            .hero h1 { font-size: 1.5rem; }
+            .hero-quote { display: none; }
+            .stat-bar { margin: 16px 18px 0; grid-template-columns: 1fr 1fr; }
+            main.content-area { padding: 18px 18px 50px; }
+            .roadmap-grid { grid-template-columns: repeat(auto-fill, minmax(150px,1fr)); }
+            .part.open .part-header { flex-wrap: wrap; }
+            .part.open .part-progress-row { align-items: flex-start; min-width: 0; width: 100%; }
+            .part.open .part-bar { width: 100%; }
         }
-        @media (max-width: 450px) {
-            .part-header .part-progress .bar {
-                width: 50px;
-            }
-            .section-header .sec-title {
-                font-size: 0.75rem;
-            }
-            .topic .topic-name {
-                font-size: 0.7rem;
-            }
+        @media (max-width: 460px) {
+            .stat-bar { grid-template-columns: 1fr; }
+            .stat-cell { border-right: none !important; border-bottom: 1px solid var(--border); }
         }
     </style>
 </head>
 <body>
+    <div class="glow-top"></div>
 
-    <header id="main-header">
-        <div class="header-left">
-            <h1>⬢ PRINCIPAL RED TEAM OPERATOR</h1>
-            <p>Complete Curriculum — Gamified Learning Roadmap | 100% Free Resources</p>
+    <aside class="sidebar" id="sidebar">
+        <div class="brand">
+            <svg viewBox="0 0 100 60" fill="var(--accent)"><path d="M50 8c-3 5-6 7-12 6 4 3 5 6 4 10-6-5-11-6-17-3 6 2 9 5 10 10-9-2-16 1-22 9 8-1 13 1 16 6-8 1-13 5-16 12 7-4 13-4 18 0-4 6-4 11 0 17 3-6 7-9 12-9-2 6 0 11 5 14 1-7 4-11 9-13-1 6 1 11 5 14 1-7 3-11 8-13 5 2 7 6 8 13 4-3 6-8 5-14 5 2 8 6 9 13-4-3-4-8 0-14 4 4 8 4 18 0-3-7-8-11-16-12 3-8 8-10 16-9-6-8-13-11-22-9 1-5 4-8 10-10-6-3-11-2-17 3-1-4 0-7 4-10-6 1-9-1-12-6z"/></svg>
+            <div class="brand-text">Red Team<br>Ops Tracker</div>
         </div>
-        <div class="header-right">
-            <div class="stats">
-                <span>Completed: <b id="stat-completed">0</b></span>
-                <span>Total: <b id="stat-total">0</b></span>
-                <span>Progress: <b id="stat-pct">0%</b></span>
-            </div>
-            <div class="progress-ring" id="progress-ring">
-                <svg width="54" height="54" viewBox="0 0 54 54">
-                    <circle cx="27" cy="27" r="22" stroke="var(--border)" stroke-width="3" fill="none" />
-                    <circle id="progress-circle" cx="27" cy="27" r="22" stroke="var(--green)" stroke-width="3" fill="none"
-                    stroke-dasharray="138.23" stroke-dashoffset="138.23" stroke-linecap="round" />
-                </svg>
-                <span id="ring-text">0%</span>
-            </div>
-            <button class="btn" onclick="expandAll()">▣ Expand All</button>
-            <button class="btn" onclick="collapseAll()">▢ Collapse All</button>
-            <button class="btn danger" onclick="resetProgress()">✖ Reset</button>
+        <ul class="nav-list">
+            <li class="nav-item active" onclick="document.getElementById('roadmap-anchor').scrollIntoView({behavior:'smooth'})">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 19.5V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v13.5"/><path d="M4 19.5A1.5 1.5 0 0 1 5.5 18H20"/><path d="M8 7h8M8 11h8"/></svg>
+                Roadmap
+            </li>
+            <li class="nav-item" onclick="document.querySelector('.stat-bar').scrollIntoView({behavior:'smooth'})">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 20V10M12 20V4M20 20v-7"/></svg>
+                Progress
+            </li>
+            <li class="nav-item" title="Coming soon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M9 2h6l1 4h3v2h-2l-1.5 12a2 2 0 0 1-2 1.8H10.5a2 2 0 0 1-2-1.8L7 8H5V6h3l1-4Z"/><path d="M10 11v6M14 11v6"/></svg>
+                Lab Vault
+            </li>
+            <li class="nav-item" title="Coming soon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 19.5V4.5A2.5 2.5 0 0 1 6.5 2H18a1 1 0 0 1 1 1v17"/><path d="M6.5 22H19v-2.5H6.5A2.5 2.5 0 0 0 4 22z"/></svg>
+                Resources
+            </li>
+            <li class="nav-item" title="Coming soon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="m14.7 6.3 3 3L8 19H5v-3L14.7 6.3Z"/><path d="m13 8 3 3"/><path d="M17.5 3.5 20.5 6.5 18 9 15 6z"/></svg>
+                Tools
+            </li>
+            <li class="nav-item" title="Coming soon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M5 3h11l3 3v15H5z"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>
+                Notes
+            </li>
+            <li class="nav-item" title="Coming soon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M8 21h8M12 17v4"/><path d="M6 3h12v4a6 6 0 0 1-12 0V3Z"/><path d="M6 5H4a2 2 0 0 0 0 4h2M18 5h2a2 2 0 0 1 0 4h-2"/></svg>
+                Achievements
+            </li>
+            <li class="nav-item" title="Coming soon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 0 1-4 0v-.09A1.7 1.7 0 0 0 9 19.4a1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.55-1H3a2 2 0 0 1 0-4h.09A1.7 1.7 0 0 0 4.6 9a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-1.55V3a2 2 0 0 1 4 0v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.7 1.7 0 0 0 19.4 9a1.7 1.7 0 0 0 1.55 1H21a2 2 0 0 1 0 4h-.09a1.7 1.7 0 0 0-1.51 1Z"/></svg>
+                Settings
+            </li>
+        </ul>
+        <div class="sidebar-quote">
+            "The training is nothing.<br>The will is everything."
         </div>
-    </header>
+    </aside>
 
-    <main id="main-content">
-        <div class="disclaimer">
-            <b>⚠ IMPORTANT:</b> All offensive security topics (Parts VI–IX, X–XI) must be practiced only in
-            <b>authorized, isolated lab environments</b>. Use TryHackMe, HackTheBox, or your own VMs.
-            The goal is <b>defensive validation</b>, not attacking real systems without permission.
-            <br><br>
-            <b>Progression:</b> Foundation → Systems → Networking → Programming → Web → AD → Cloud → Vuln Research →
-            Offensive Security → Adversary Emulation → OPSEC → Reverse Engineering → Detection → Research →
-            Leadership → Principal
-            <br><br>
-            <span style="color:var(--optional); font-weight:bold;">✨ OPTIONAL SECTIONS:</span> Social Engineering, OSINT,
-            Kernel/rootkit development, and Physical Security are marked with a magenta border. They are not required but
-            will elevate your game to world-class principal level.
+    <div class="main-wrap">
+        <section class="hero">
+            <button class="menu-btn" id="menu-btn" onclick="document.getElementById('sidebar').classList.toggle('open')" aria-label="Toggle menu">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+            </button>
+            <svg class="hero-bat" viewBox="0 0 100 60" fill="var(--accent)"><path d="M50 8c-3 5-6 7-12 6 4 3 5 6 4 10-6-5-11-6-17-3 6 2 9 5 10 10-9-2-16 1-22 9 8-1 13 1 16 6-8 1-13 5-16 12 7-4 13-4 18 0-4 6-4 11 0 17 3-6 7-9 12-9-2 6 0 11 5 14 1-7 4-11 9-13-1 6 1 11 5 14 1-7 3-11 8-13 5 2 7 6 8 13 4-3 6-8 5-14 5 2 8 6 9 13-4-3-4-8 0-14 4 4 8 4 18 0-3-7-8-11-16-12 3-8 8-10 16-9-6-8-13-11-22-9 1-5 4-8 10-10-6-3-11-2-17 3-1-4 0-7 4-10-6 1-9-1-12-6z"/></svg>
+            <div class="hero-kicker">Principal</div>
+            <h1>Red Team Operator</h1>
+            <div class="hero-sub">Interactive Roadmap to Offensive Excellence</div>
+            <div class="hero-quote">"It's not who I am underneath,<br>but what I do that defines me."<span>— The Curriculum</span></div>
+        </section>
+
+        <div class="stat-bar">
+            <div class="stat-cell">
+                <div class="ring-wrap">
+                    <svg width="54" height="54" viewBox="0 0 54 54">
+                        <circle class="bg-ring" cx="27" cy="27" r="22" />
+                        <circle id="progress-circle" class="fg-ring" cx="27" cy="27" r="22"
+                            stroke-dasharray="138.23" stroke-dashoffset="138.23" />
+                    </svg>
+                    <span class="ring-label" id="ring-text">0%</span>
+                </div>
+                <div>
+                    <div class="stat-label">Your Journey</div>
+                    <div class="stat-value"><span id="stat-pct">0%</span></div>
+                    <div class="stat-sub"><b id="stat-completed">0</b> of <b id="stat-total">0</b> topics — overall progress</div>
+                </div>
+            </div>
+            <div class="stat-cell">
+                <div class="stat-icon-box" id="stage-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 21c3-1 6-3 9-3s6 2 9 3M12 3c-3 3-3 9 0 12 3-3 3-9 0-12Z"/></svg>
+                </div>
+                <div>
+                    <div class="stat-label">Current Stage</div>
+                    <div class="stat-value" id="stage-name" style="font-size:1.1rem;">Recruit</div>
+                    <div class="stat-sub" id="stage-desc">Just getting started. Every operator begins here.</div>
+                </div>
+            </div>
+            <div class="stat-cell">
+                <div class="stat-icon-box" id="focus-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="0.6" fill="currentColor"/></svg>
+                </div>
+                <div>
+                    <div class="stat-label">Focus Area</div>
+                    <div class="stat-value" id="focus-title" style="font-size:1.05rem;">—</div>
+                    <div class="stat-sub" id="focus-desc">Master the fundamentals first.</div>
+                </div>
+            </div>
+            <div class="stat-cell">
+                <div class="stat-icon-box">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M5 21V4M5 4h11l-2 3 2 3H5"/></svg>
+                </div>
+                <div style="width:100%">
+                    <div class="stat-label">Next Milestone</div>
+                    <div class="stat-value" id="milestone-title" style="font-size:1.02rem;">—</div>
+                    <div class="stat-sub" id="milestone-frac">0 / 0 Sections</div>
+                    <div class="mini-bar"><div class="fill" id="milestone-bar" style="width:0%"></div></div>
+                </div>
+            </div>
         </div>
-        <div id="curriculum-container"></div>
-    </main>
+
+        <main class="content-area" id="main-content">
+            <div class="disclaimer">
+                <b>⚠ IMPORTANT:</b> All offensive security topics (Parts VI–IX, X–XI) must be practiced only in
+                <b>authorized, isolated lab environments</b>. Use TryHackMe, HackTheBox, or your own VMs.
+                The goal is <b>defensive validation</b>, not attacking real systems without permission.
+                <br><br>
+                <b>Progression:</b> Foundation → Systems → Networking → Programming → Web → AD → Cloud → Vuln Research →
+                Offensive Security → Adversary Emulation → OPSEC → Reverse Engineering → Detection → Research →
+                Leadership → Principal
+                <br><br>
+                <span style="color:var(--optional); font-weight:bold;">✨ OPTIONAL SECTIONS:</span> Social Engineering, OSINT,
+                Kernel/rootkit development, and Physical Security are marked with a pink border. They are not required but
+                will elevate your game to world-class principal level.
+            </div>
+
+            <div class="section-toolbar" id="roadmap-anchor">
+                <div class="toolbar-title"><span class="chev">&raquo;&raquo;</span> Roadmap Sections <span class="chev">&raquo;</span></div>
+                <div class="toolbar-right">
+                    <div class="filter-group">
+                        <button class="filter-btn active" data-filter="all" onclick="filterParts('all', this)">All Sections</button>
+                        <button class="filter-btn" data-filter="core" onclick="filterParts('core', this)">Core</button>
+                        <button class="filter-btn" data-filter="optional" onclick="filterParts('optional', this)">Optional</button>
+                    </div>
+                    <button class="btn" onclick="expandAll()">▣ Expand All</button>
+                    <button class="btn" onclick="collapseAll()">▢ Collapse All</button>
+                    <button class="btn danger" onclick="resetProgress()">✖ Reset</button>
+                    <div class="view-toggle">
+                        <button class="view-btn active" data-view="grid" onclick="setView('grid', this)" title="Grid view">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+                        </button>
+                        <button class="view-btn" data-view="list" onclick="setView('list', this)" title="List view">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="curriculum-container" class="roadmap-grid"></div>
+        </main>
+    </div>
 
     <script>
         // ============================================================
@@ -739,17 +673,24 @@
                     { n: "Windows Administration", u: "https://learn.microsoft.com/en-us/powershell/scripting/samples/sample-scripts-for-administration", s: "Microsoft Learn" },
                     { n: "Automation", u: "https://learn.microsoft.com/en-us/powershell/scripting/learn/ps101/09-functions", s: "Microsoft Learn" },
                     { n: "Security Administration", u: "https://learn.microsoft.com/en-us/powershell/scripting/samples/working-with-software-installations", s: "Microsoft Learn" },
-                    { n: "API Interaction", u: "https://learn.microsoft.com/en-us/powershell/scripting/learn/ps101/10-script-modules", s: "Microsoft Learn" }
+                    { n: "API Interaction (Invoke-RestMethod)", u: "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/invoke-restmethod?view=powershell-7.6", s: "Microsoft Learn" },
+                    { n: "API Interaction (Invoke-WebRequest)", u: "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/invoke-webrequest?view=powershell-7.6", s: "Microsoft Learn" }
                 ]
             }, {
                 num: "7",
                 title: "Bash & Unix Automation",
                 topics: [
-                    { n: "Shell Fundamentals", u: "https://www.gnu.org/software/bash/manual/html_node/Basic-Shell-Features.html", s: "GNU Bash Manual" },
-                    { n: "Pipes and Redirection", u: "https://www.gnu.org/software/bash/manual/html_node/Redirections.html", s: "GNU Bash Manual" },
-                    { n: "Text Processing", u: "https://www.gnu.org/software/gawk/manual/gawk.html", s: "GNU Awk Manual" },
-                    { n: "Process Management", u: "https://www.gnu.org/software/bash/manual/html_node/Job-Control.html", s: "GNU Bash Manual" },
-                    { n: "Automation", u: "https://www.gnu.org/software/bash/manual/html_node/Shell-Scripts.html", s: "GNU Bash Manual" },
+                    { n: "Shell Fundamentals (Learning the Shell)", u: "http://linuxcommand.org/lc3_learning_the_shell.php", s: "LinuxCommand" },
+                    { n: "Shell Fundamentals (Bash Basics)", u: "https://devdocs.io/bash/basic-shell-features", s: "DevDocs" },
+                    { n: "Pipes and Redirection (Redirection Chapter)", u: "http://linuxcommand.org/lc3_lts0070.php", s: "LinuxCommand" },
+                    { n: "Pipes and Redirection (Redirections)", u: "https://devdocs.io/bash/redirections", s: "DevDocs" },
+                    { n: "Text Processing (AWK)", u: "https://www.grymoire.com/Unix/Awk.html", s: "Grymoire" },
+                    { n: "Text Processing (SED)", u: "https://www.grymoire.com/Unix/Sed.html", s: "Grymoire" },
+                    { n: "Text Processing (GREP)", u: "https://www.grymoire.com/Unix/Grep.html", s: "Grymoire" },
+                    { n: "Process Management (Processes Chapter)", u: "http://linuxcommand.org/lc3_lts0100.php", s: "LinuxCommand" },
+                    { n: "Process Management (Job Control)", u: "https://devdocs.io/bash/job-control", s: "DevDocs" },
+                    { n: "Automation (Writing Shell Scripts)", u: "http://linuxcommand.org/lc3_writing_shell_scripts.php", s: "LinuxCommand" },
+                    { n: "Automation (Automating Tasks Guide)", u: "https://tldp.org/LDP/abs/html/automating.html", s: "TLDP" },
                     { n: "System Administration", u: "https://tldp.org/LDP/abs/html/index.html", s: "Advanced Bash-Scripting Guide" }
                 ]
             }, {
@@ -783,7 +724,7 @@
                     { n: "REST APIs", u: "https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Methods", s: "MDN" },
                     { n: "WebSockets", u: "https://developer.mozilla.org/en-US/docs/Web/API/WebSocket", s: "MDN" },
                     { n: "Authentication", u: "https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Authentication", s: "MDN" },
-                    { n: "Authorization", u: "https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CORS", s: "MDN" }
+                    { n: "Authorization", u: "https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Authorization", s: "MDN" }
                 ]
             }, {
                 num: "10",
@@ -834,8 +775,9 @@
                     { n: "NTLM", u: "https://www.thehacker.recipes/ad/movement/ntlm", s: "TheHacker.recipes" },
                     { n: "Trusts", u: "https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/plan/understanding-the-active-directory-logical-model", s: "Microsoft Learn" },
                     { n: "Privileged Accounts", u: "https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/plan/security-best-practices/appendix-b--privileged-accounts-and-groups-in-active-directory", s: "Microsoft Learn" },
-                    { n: "Identity Attack Paths", u: "https://www.thehacker.recipes/ad/", s: "TheHacker.recipes" },
-                    { n: "AD Detection", u: "https://tryhackme.com/room/activedirectoryhardening", s: "TryHackMe" }
+                    { n: "Identity Attack Paths", u: "https://www.thehacker.recipes/ad/recon/", s: "TheHacker.recipes" },
+                    { n: "AD Detection (Kerberoasted Lab)", u: "https://cyberdefenders.org/blueteam-ctf-challenges/kerberoasted/", s: "CyberDefenders" },
+                    { n: "AD Detection (Event Logs Cheat Sheet)", u: "https://adsecurity.org/?tag=event-logs", s: "ADSecurity.org" }
                 ]
             }, {
                 num: "13",
@@ -891,18 +833,18 @@
                     { n: "Managed Identities", u: "https://learn.microsoft.com/en-us/entra/identity/managed-identities-azure-resources/overview", s: "Microsoft Learn" },
                     { n: "Conditional Access", u: "https://learn.microsoft.com/en-us/entra/identity/conditional-access/overview", s: "Microsoft Learn" },
                     { n: "Azure Logging", u: "https://learn.microsoft.com/en-us/azure/azure-monitor/fundamentals/overview", s: "Microsoft Learn" },
-                    { n: "Cloud Identity Attack Paths", u: "https://learn.microsoft.com/en-us/entra/identity/monitoring-health/overview-monitoring-health", s: "Microsoft Learn" }
+                    { n: "Cloud Identity Attack Paths", u: "https://learn.microsoft.com/en-us/azure/defender-for-cloud/how-to-manage-attack-path?pivots=defender-portal", s: "Microsoft Learn" }
                 ]
             }, {
                 num: "17",
                 title: "GCP",
                 topics: [
-                    { n: "IAM", u: "https://cloud.google.com/iam/docs/overview", s: "Google Cloud Docs" },
-                    { n: "Projects", u: "https://cloud.google.com/resource-manager/docs/creating-managing-projects", s: "Google Cloud Docs" },
-                    { n: "Service Accounts", u: "https://cloud.google.com/iam/docs/service-accounts", s: "Google Cloud Docs" },
-                    { n: "Networking", u: "https://cloud.google.com/vpc/docs/overview", s: "Google Cloud Docs" },
-                    { n: "Logging", u: "https://cloud.google.com/logging/docs/overview", s: "Google Cloud Docs" },
-                    { n: "Security Architecture", u: "https://cloud.google.com/security/overview/whitepaper", s: "Google Cloud Whitepaper" }
+                    { n: "IAM", u: "https://docs.cloud.google.com/iam/docs/overview", s: "Google Cloud Docs" },
+                    { n: "Projects", u: "https://docs.cloud.google.com/resource-manager/docs/creating-managing-projects", s: "Google Cloud Docs" },
+                    { n: "Service Accounts", u: "https://docs.cloud.google.com/iam/docs/service-accounts", s: "Google Cloud Docs" },
+                    { n: "Networking", u: "https://docs.cloud.google.com/vpc/docs/overview", s: "Google Cloud Docs" },
+                    { n: "Logging", u: "https://docs.cloud.google.com/logging/docs/overview", s: "Google Cloud Docs" },
+                    { n: "Security Architecture", u: "https://docs.cloud.google.com/security/overview/whitepaper", s: "Google Cloud Whitepaper" }
                 ]
             }]
         }, {
@@ -916,7 +858,9 @@
                 topics: [
                     { n: "Attack-Surface Discovery", u: "https://tryhackme.com/room/redteamrecon", s: "TryHackMe" },
                     { n: "Asset Identification", u: "https://tryhackme.com/room/redteamrecon", s: "TryHackMe" },
-                    { n: "DNS Reconnaissance", u: "https://tryhackme.com/room/dnsreconnaissance", s: "TryHackMe" },
+                    { n: "DNS Reconnaissance (Foundation: DNS in Detail)", u: "https://tryhackme.com/room/dnsindetail", s: "TryHackMe" },
+                    { n: "DNS Reconnaissance (Recon Proper: Passive Reconnaissance)", u: "https://tryhackme.com/room/passiverecon", s: "TryHackMe" },
+                    { n: "DNS Reconnaissance (Application: Dig Dug Challenge)", u: "https://tryhackme.com/room/digdug", s: "TryHackMe" },
                     { n: "Service Enumeration", u: "https://nmap.org/book/man.html", s: "Nmap Docs" },
                     { n: "Technology Identification", u: "https://www.wappalyzer.com/", s: "Wappalyzer" },
                     { n: "External Attack Surface", u: "https://tryhackme.com/room/redteamrecon", s: "TryHackMe" },
@@ -926,12 +870,12 @@
                 num: "19",
                 title: "Vulnerability Assessment",
                 topics: [
-                    { n: "Vulnerability Discovery", u: "https://tryhackme.com/room/vulnerabilityscanner", s: "TryHackMe" },
-                    { n: "Validation", u: "https://tryhackme.com/room/vulnerabilityscanner", s: "TryHackMe" },
+                    { n: "Vulnerability Discovery", u: "https://tryhackme.com/room/vulnerabilities101", s: "TryHackMe" },
+                    { n: "Validation", u: "https://portswigger.net/burp/documentation/desktop/testing-workflow/vulnerabilities", s: "PortSwigger" },
                     { n: "Risk Analysis", u: "https://nvd.nist.gov/vuln-metrics/cvss", s: "NIST CVSS" },
-                    { n: "False Positives", u: "https://tryhackme.com/room/vulnerabilityscanner", s: "TryHackMe" },
-                    { n: "Exploitability Assessment", u: "https://nvd.nist.gov/vuln-metrics/cvss", s: "NIST CVSS" },
-                    { n: "Prioritization", u: "https://nvd.nist.gov/vuln-metrics/cvss", s: "NIST CVSS" }
+                    { n: "False Positives", u: "https://tuxcare.com/blog/false-positive-vulnerability/", s: "TuxCare" },
+                    { n: "Exploitability Assessment", u: "https://www.exploit-db.com/", s: "Exploit-DB" },
+                    { n: "Prioritization", u: "https://www.cisa.gov/ssvc-calculator", s: "CISA" }
                 ]
             }, {
                 num: "20",
@@ -942,20 +886,20 @@
                     { n: "Authentication Attacks", u: "https://tryhackme.com/room/authenticationbypass", s: "TryHackMe" },
                     { n: "Web Exploitation", u: "https://portswigger.net/web-security/all-topics", s: "PortSwigger Academy" },
                     { n: "Network-Service Exploitation", u: "https://tryhackme.com/room/networkservices", s: "TryHackMe" },
-                    { n: "Privilege Boundaries", u: "https://tryhackme.com/room/linuxprivilegeescalation", s: "TryHackMe" },
+                    { n: "Privilege Boundaries", u: "https://www.ibm.com/think/topics/privilege-escalation", s: "IBM" },
                     { n: "Post-Exploitation Concepts", u: "https://tryhackme.com/room/postexploit", s: "TryHackMe" }
                 ]
             }, {
                 num: "21",
                 title: "Privilege Escalation",
                 topics: [
-                    { n: "Linux Privilege Boundaries", u: "https://tryhackme.com/room/linuxprivilegeescalation", s: "TryHackMe" },
-                    { n: "Windows Privilege Boundaries", u: "https://tryhackme.com/room/windowsprivilegeescalation", s: "TryHackMe" },
-                    { n: "Misconfigurations", u: "https://book.hacktricks.xyz/linux-hardening/privilege-escalation", s: "HackTricks" },
-                    { n: "Service Security", u: "https://book.hacktricks.xyz/linux-hardening/privilege-escalation", s: "HackTricks" },
-                    { n: "Credential Exposure", u: "https://book.hacktricks.xyz/windows-hardening/windows-local-privilege-escalation", s: "HackTricks" },
+                    { n: "Linux Privilege Boundaries", u: "https://tryhackme.com/room/linprivesc", s: "TryHackMe" },
+                    { n: "Windows Privilege Boundaries", u: "https://tryhackme.com/room/windowsprivesc20", s: "TryHackMe" },
+                    { n: "Misconfigurations", u: "https://hacktricks.wiki/en/linux-hardening/linux-basics/linux-privilege-escalation/index.html", s: "HackTricks" },
+                    { n: "Service Security", u: "https://hacktricks.wiki/en/linux-hardening/linux-basics/linux-privilege-escalation/index.html", s: "HackTricks" },
+                    { n: "Credential Exposure", u: "https://hacktricks.wiki/en/windows-hardening/windows-local-privilege-escalation/index.html", s: "HackTricks" },
                     { n: "Identity-Based Escalation", u: "https://www.thehacker.recipes/ad/movement/", s: "TheHacker.recipes" },
-                    { n: "Defensive Detection", u: "https://tryhackme.com/room/defensivesecurity", s: "TryHackMe" }
+                    { n: "Defensive Detection", u: "https://tryhackme.com/room/defensivesecurityintro", s: "TryHackMe" }
                 ]
             }]
         }, {
@@ -971,7 +915,7 @@
                     { n: "Threat Actor Research", u: "https://attack.mitre.org/groups/", s: "MITRE Groups" },
                     { n: "Tactics and Techniques", u: "https://attack.mitre.org/tactics/enterprise/", s: "MITRE Tactics" },
                     { n: "Campaign Modeling", u: "https://attack.mitre.org/campaigns/", s: "MITRE Campaigns" },
-                    { n: "Attack-Path Development", u: "https://www.thehacker.recipes/ad/", s: "TheHacker.recipes" },
+                    { n: "Attack-Path Development", u: "https://learn.microsoft.com/bs-latn-ba/security-exposure-management/work-attack-paths-overview", s: "Microsoft Learn" },
                     { n: "Emulation Planning", u: "https://attack.mitre.org/resources/adversary-emulation-plans/", s: "MITRE Emulation Plans" },
                     { n: "Detection Validation", u: "https://github.com/redcanaryco/atomic-red-team", s: "Atomic Red Team" }
                 ]
@@ -983,8 +927,11 @@
                     { n: "Communication Channels", u: "https://github.com/BishopFox/sliver/wiki", s: "Sliver Wiki" },
                     { n: "Infrastructure Design", u: "https://github.com/bluscreenofjeff/Red-Team-Infrastructure-Wiki", s: "RT Infra Wiki" },
                     { n: "Authentication", u: "https://github.com/BishopFox/sliver/wiki", s: "Sliver Wiki" },
+                    { n: "Authentication (Cheat Sheet)", u: "https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html", s: "OWASP" },
                     { n: "Encryption", u: "https://github.com/BishopFox/sliver/wiki", s: "Sliver Wiki" },
+                    { n: "Encryption (Cheat Sheet)", u: "https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html", s: "OWASP" },
                     { n: "Infrastructure Monitoring", u: "https://github.com/BishopFox/sliver/wiki", s: "Sliver Wiki" },
+                    { n: "Infrastructure Monitoring (Log Mgmt Guide)", u: "https://csrc.nist.gov/pubs/sp/800/92/final", s: "NIST" },
                     { n: "Safe C2 Lab Design", u: "https://github.com/bluscreenofjeff/Red-Team-Infrastructure-Wiki", s: "RT Infra Wiki" }
                 ]
             }, {
@@ -994,10 +941,11 @@
                     { n: "OPSEC Fundamentals", u: "https://www.youtube.com/watch?v=-FU3Ax92bis", s: "PowerCert Animated Videos" },
                     { n: "Identity Separation", u: "https://github.com/bluscreenofjeff/Red-Team-Infrastructure-Wiki", s: "RT Infra Wiki" },
                     { n: "Infrastructure Hygiene", u: "https://github.com/bluscreenofjeff/Red-Team-Infrastructure-Wiki", s: "RT Infra Wiki" },
-                    { n: "Metadata", u: "https://www.youtube.com/watch?v=-FU3Ax92bis", s: "PowerCert Animated Videos" },
+                    { n: "Metadata", u: "https://exiftool.org/", s: "ExifTool" },
                     { n: "Logging Exposure", u: "https://github.com/bluscreenofjeff/Red-Team-Infrastructure-Wiki", s: "RT Infra Wiki" },
+                    { n: "Logging Exposure (Log Mgmt Guide)", u: "https://csrc.nist.gov/pubs/sp/800/92/final", s: "NIST" },
                     { n: "Operational Risk", u: "https://github.com/bluscreenofjeff/Red-Team-Infrastructure-Wiki", s: "RT Infra Wiki" },
-                    { n: "Compromise Scenarios", u: "https://github.com/bluscreenofjeff/Red-Team-Infrastructure-Wiki", s: "RT Infra Wiki" },
+                    { n: "Compromise Scenarios", u: "https://github.com/center-for-threat-informed-defense/attack-flow", s: "MITRE Attack Flow" },
                     { n: "Cleanup and Documentation", u: "https://github.com/bluscreenofjeff/Red-Team-Infrastructure-Wiki", s: "RT Infra Wiki" }
                 ]
             }, {
@@ -1005,10 +953,10 @@
                 title: "Lateral Movement",
                 topics: [
                     { n: "Enterprise Trust Relationships", u: "https://www.thehacker.recipes/ad/movement/", s: "TheHacker.recipes" },
-                    { n: "Remote Administration", u: "https://tryhackme.com/room/lateralmovement", s: "TryHackMe" },
+                    { n: "Remote Administration", u: "https://attack.mitre.org/techniques/T1021/", s: "MITRE ATT&CK" },
                     { n: "Identity-Based Movement", u: "https://www.thehacker.recipes/ad/movement/", s: "TheHacker.recipes" },
-                    { n: "Network Segmentation", u: "https://tryhackme.com/room/lateralmovement", s: "TryHackMe" },
-                    { n: "Attack-Path Analysis", u: "https://www.thehacker.recipes/ad/", s: "TheHacker.recipes" },
+                    { n: "Network Segmentation", u: "https://csrc.nist.gov/pubs/sp/800/207/final", s: "NIST" },
+                    { n: "Attack-Path Analysis", u: "https://www.thehacker.recipes/ad/recon/", s: "TheHacker.recipes" },
                     { n: "Detection Opportunities", u: "https://attack.mitre.org/tactics/TA0008/", s: "MITRE ATT&CK" }
                 ]
             }]
@@ -1023,24 +971,24 @@
                 topics: [
                     { n: "Assembly", u: "https://opensecuritytraining.info/IntroX86.html", s: "OpenSecurityTraining2" },
                     { n: "PE Files", u: "https://learn.microsoft.com/en-us/windows/win32/debug/pe-format", s: "Microsoft Learn" },
-                    { n: "ELF Files", u: "https://linux.die.net/man/5/elf", s: "Linux man pages" },
-                    { n: "Debuggers", u: "https://ghidra-sre.org/", s: "Ghidra" },
-                    { n: "Static Analysis", u: "https://ghidra-sre.org/", s: "Ghidra" },
-                    { n: "Dynamic Analysis", u: "https://x64dbg.com/", s: "x64dbg" },
-                    { n: "Function Analysis", u: "https://ghidra-sre.org/", s: "Ghidra" },
-                    { n: "Program Behavior", u: "https://opensecuritytraining.info/AdvancedX86.html", s: "OpenSecurityTraining2" }
+                    { n: "ELF Files", u: "https://www.man7.org/linux/man-pages/man5/elf.5.html", s: "Linux man pages" },
+                    { n: "Debuggers", u: "https://github.com/NationalSecurityAgency/ghidra", s: "Ghidra" },
+                    { n: "Static Analysis", u: "https://github.com/NationalSecurityAgency/ghidra", s: "Ghidra" },
+                    { n: "Dynamic Analysis", u: "https://github.com/NationalSecurityAgency/ghidra", s: "Ghidra" },
+                    { n: "Function Analysis", u: "https://github.com/NationalSecurityAgency/ghidra", s: "Ghidra" },
+                    { n: "Program Behavior", u: "https://opensecuritytraining.info/IntroductionToReverseEngineering.html", s: "OpenSecurityTraining2" }
                 ]
             }, {
                 num: "27",
                 title: "Vulnerability Research",
                 topics: [
-                    { n: "CVE/CWE", u: "https://cwe.mitre.org/", s: "CWE Database" },
-                    { n: "Root-Cause Analysis", u: "https://nvd.nist.gov/", s: "NVD" },
-                    { n: "Source-Code Review", u: "https://github.com/ossf/oss-vulnerability-guide", s: "OSSF Guide" },
-                    { n: "Fuzzing Concepts", u: "https://github.com/AFLplusplus/AFLplusplus", s: "AFL++" },
-                    { n: "Crash Analysis", u: "https://github.com/AFLplusplus/AFLplusplus", s: "AFL++" },
+                    { n: "CVE/CWE", u: "https://cwe.mitre.org/", s: "CWE Database", extra: [{ u: "https://www.cve.org/", s: "CVE.org" }] },
+                    { n: "Root-Cause Analysis", u: "https://nvd.nist.gov/", s: "NVD", extra: [{ u: "https://googleprojectzero.blogspot.com/p/rca-cve-2019-1458.html", s: "Project Zero RCA example" }] },
+                    { n: "Source-Code Review", u: "https://github.com/ossf/oss-vulnerability-guide", s: "OSSF Guide", extra: [{ u: "https://github.com/OWASP/www-project-code-review-guide", s: "OWASP Code Review Guide" }] },
+                    { n: "Fuzzing Concepts", u: "https://github.com/AFLplusplus/AFLplusplus", s: "AFL++", extra: [{ u: "https://github.com/AFLplusplus/AFLplusplus/blob/stable/docs/fuzzing_in_depth.md", s: "AFL++ Fuzzing In Depth" }] },
+                    { n: "Crash Analysis", u: "https://github.com/AFLplusplus/AFLplusplus", s: "AFL++", extra: [{ u: "https://github.com/AFLplusplus/AFLplusplus/blob/stable/docs/fuzzing_in_depth.md", s: "AFL++ Fuzzing In Depth" }] },
                     { n: "Exploitability Analysis", u: "https://nvd.nist.gov/vuln-metrics/cvss", s: "NIST CVSS" },
-                    { n: "Security Research Methodology", u: "https://googleprojectzero.blogspot.com/", s: "Project Zero" }
+                    { n: "Security Research Methodology", u: "https://projectzero.google/", s: "Project Zero" }
                 ]
             }, {
                 num: "28",
@@ -1069,8 +1017,8 @@
                     { n: "Network Telemetry", u: "https://docs.zeek.org/en/master/", s: "Zeek Docs" },
                     { n: "Cloud Telemetry", u: "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-user-guide.html", s: "AWS CloudTrail" },
                     { n: "EDR", u: "https://learn.microsoft.com/en-us/defender-endpoint/", s: "Microsoft Defender" },
-                    { n: "SIEM", u: "https://www.splunk.com/en_us/resources/videos/splunk-free.html", s: "Splunk Free" },
-                    { n: "Detection Pipelines", u: "https://github.com/SigmaHQ/sigma", s: "Sigma" }
+                    { n: "SIEM", u: "https://www.splunk.com/en_us/products/enterprise-security.html", s: "Splunk Enterprise Security" },
+                    { n: "Detection Pipelines", u: "https://github.com/SigmaHQ/sigma", s: "Sigma", extra: [{ u: "https://sigmahq.io/docs/digging-deeper/pipelines/", s: "SigmaHQ Pipelines Docs" }] }
                 ]
             }, {
                 num: "30",
@@ -1080,8 +1028,8 @@
                     { n: "Sigma", u: "https://github.com/SigmaHQ/sigma", s: "Sigma Rules" },
                     { n: "YARA", u: "https://github.com/VirusTotal/yara", s: "YARA" },
                     { n: "Behavioral Detection", u: "https://github.com/SigmaHQ/sigma", s: "Sigma" },
-                    { n: "Attack-Path Detection", u: "https://attack.mitre.org/detections/", s: "MITRE ATT&CK" },
-                    { n: "Alert Triage", u: "https://www.splunk.com/en_us/resources/videos/splunk-free.html", s: "Splunk Free" },
+                    { n: "Attack-Path Detection", u: "https://attack.mitre.org/detectionstrategies/", s: "MITRE ATT&CK" },
+                    { n: "Alert Triage", u: "https://help.splunk.com/en/splunk-enterprise-security-8/user-guide/8.3/mission-control/triage-findings-and-finding-groups-in-splunk-enterprise-security", s: "Splunk ES Mission Control" },
                     { n: "Detection Validation", u: "https://github.com/redcanaryco/atomic-red-team", s: "Atomic Red Team" }
                 ]
             }, {
@@ -1090,9 +1038,9 @@
                 topics: [
                     { n: "Security-Control Awareness", u: "https://attack.mitre.org/mitigations/enterprise/", s: "MITRE Mitigations" },
                     { n: "Telemetry Analysis", u: "https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon", s: "Sysmon Docs" },
-                    { n: "Detection Gaps", u: "https://attack.mitre.org/detections/", s: "MITRE ATT&CK" },
+                    { n: "Detection Gaps", u: "https://attack.mitre.org/detectionstrategies/", s: "MITRE ATT&CK" },
                     { n: "Control Validation", u: "https://github.com/redcanaryco/atomic-red-team", s: "Atomic Red Team" },
-                    { n: "Measuring Defensive Resilience", u: "https://attack.mitre.org/", s: "MITRE ATT&CK" }
+                    { n: "Measuring Defensive Resilience", u: "https://attack.mitre.org/resources/get-started/assessment-and-engineering/", s: "MITRE ATT&CK" }
                 ]
             }]
         }, {
@@ -1107,18 +1055,18 @@
                     { n: "Android", u: "https://owasp.org/www-project-mobile-security-testing-guide/", s: "OWASP MASTG" },
                     { n: "iOS", u: "https://owasp.org/www-project-mobile-security-testing-guide/", s: "OWASP MASTG" },
                     { n: "Mobile Applications", u: "https://owasp.org/www-project-mobile-security-testing-guide/", s: "OWASP MASTG" },
-                    { n: "Mobile APIs", u: "https://owasp.org/www-project-mobile-security-testing-guide/", s: "OWASP MASTG" },
-                    { n: "Mobile Authentication", u: "https://owasp.org/www-project-mobile-security-testing-guide/", s: "OWASP MASTG" }
+                    { n: "Mobile APIs", u: "https://owasp.org/www-project-api-security/", s: "OWASP API Security" },
+                    { n: "Mobile Authentication", u: "https://owasp.org/www-project-mobile-security-testing-guide/", s: "OWASP MASTG", extra: [{ u: "https://mas.owasp.org/MASTG/0x04e-Testing-Authentication-and-Session-Management/", s: "MASTG Auth & Session Mgmt" }] }
                 ]
             }, {
                 num: "33",
                 title: "Wireless Security",
                 topics: [
-                    { n: "Wi-Fi Architecture", u: "https://www.aircrack-ng.org/doku.php", s: "Aircrack-ng Docs" },
-                    { n: "Authentication", u: "https://www.aircrack-ng.org/doku.php", s: "Aircrack-ng Docs" },
-                    { n: "Wireless Encryption", u: "https://www.aircrack-ng.org/doku.php", s: "Aircrack-ng Docs" },
-                    { n: "Network Segmentation", u: "https://www.aircrack-ng.org/doku.php", s: "Aircrack-ng Docs" },
-                    { n: "Wireless Monitoring", u: "https://www.wireshark.org/docs/", s: "Wireshark Docs" }
+                    { n: "Wi-Fi Architecture", u: "https://www.aircrack-ng.org/doku.php", s: "Aircrack-ng Docs", extra: [{ u: "https://www.ieee802.org/11/main.html", s: "IEEE 802.11 Standard" }] },
+                    { n: "Authentication", u: "https://www.govinfo.gov/content/pkg/GOVPUB-C13-bccd1f279aaf7e4caa863b34791bb565/pdf/GOVPUB-C13-bccd1f279aaf7e4caa863b34791bb565.pdf", s: "GovInfo" },
+                    { n: "Wireless Encryption", u: "https://www.nist.gov/publications/establishing-wireless-robust-security-networks-guide-ieee-80211i", s: "NIST" },
+                    { n: "Network Segmentation", u: "https://csrc.nist.gov/pubs/sp/800/153/final", s: "NIST SP 800-153" },
+                    { n: "Wireless Monitoring", u: "https://wiki.wireshark.org/CaptureSetup/WLAN", s: "Wireshark Wiki" }
                 ]
             }, {
                 num: "34",
@@ -1127,7 +1075,7 @@
                     { n: "Embedded Architecture", u: "https://github.com/ReFirmLabs/binwalk", s: "Binwalk" },
                     { n: "Firmware", u: "https://github.com/ReFirmLabs/binwalk", s: "Binwalk" },
                     { n: "Hardware Interfaces", u: "https://learn.sparkfun.com/tutorials/serial-communication", s: "SparkFun" },
-                    { n: "IoT Protocols", u: "https://mqtt.org/", s: "MQTT.org" },
+                    { n: "IoT Protocols", u: "https://www.hivemq.com/mqtt/", s: "HiveMQ" },
                     { n: "Firmware Analysis", u: "https://github.com/ReFirmLabs/binwalk", s: "Binwalk" }
                 ]
             }, {
@@ -1140,7 +1088,7 @@
                     { n: "RBAC", u: "https://kubernetes.io/docs/reference/access-authn-authz/rbac/", s: "K8s Docs" },
                     { n: "Secrets", u: "https://kubernetes.io/docs/concepts/configuration/secret/", s: "K8s Docs" },
                     { n: "Cluster Security", u: "https://kubernetes.io/docs/tasks/administer-cluster/securing-a-cluster/", s: "K8s Docs" },
-                    { n: "Cloud-Native Attack Surface", u: "https://kubernetes.io/docs/concepts/security/", s: "K8s Docs" }
+                    { n: "Cloud-Native Attack Surface", u: "https://kubernetes.io/docs/concepts/security/cloud-native-security/", s: "K8s Docs" }
                 ]
             }]
         }, {
@@ -1152,14 +1100,14 @@
                 num: "36",
                 title: "AI/LLM Security",
                 topics: [
-                    { n: "LLM Architecture", u: "https://owasp.org/www-project-top-10-for-large-language-model-applications/", s: "OWASP LLM Top 10" },
+                    { n: "LLM Architecture", u: "https://owasp.org/www-project-top-10-for-large-language-model-applications/assets/PDF/OWASP-Top-10-for-LLMs-v2025.pdf", s: "OWASP LLM Top 10 (2025 PDF)" },
                     { n: "AI Application Architecture", u: "https://owasp.org/www-project-top-10-for-large-language-model-applications/", s: "OWASP LLM Top 10" },
                     { n: "Prompt Injection", u: "https://owasp.org/www-project-top-10-for-large-language-model-applications/", s: "OWASP LLM Top 10" },
                     { n: "Excessive Agency", u: "https://owasp.org/www-project-top-10-for-large-language-model-applications/", s: "OWASP LLM Top 10" },
-                    { n: "Tool/Agent Security", u: "https://owasp.org/www-project-top-10-for-large-language-model-applications/", s: "OWASP LLM Top 10" },
-                    { n: "Model/API Security", u: "https://owasp.org/www-project-top-10-for-large-language-model-applications/", s: "OWASP LLM Top 10" },
-                    { n: "AI Supply Chain", u: "https://owasp.org/www-project-top-10-for-large-language-model-applications/", s: "OWASP LLM Top 10" },
-                    { n: "AI Red-Team Methodology", u: "https://owasp.org/www-project-top-10-for-large-language-model-applications/", s: "OWASP LLM Top 10" }
+                    { n: "Tool/Agent Security", u: "https://cheatsheetseries.owasp.org/cheatsheets/AI_Agent_Security_Cheat_Sheet.html", s: "OWASP Cheat Sheet" },
+                    { n: "Model/API Security", u: "https://cheatsheetseries.owasp.org/cheatsheets/Secure_AI_Model_Ops_Cheat_Sheet.html", s: "OWASP Cheat Sheet" },
+                    { n: "AI Supply Chain", u: "https://owasp.org/www-project-top-10-for-large-language-model-applications/2_0_vulns/LLM03_SupplyChain", s: "OWASP LLM03: Supply Chain" },
+                    { n: "AI Red-Team Methodology", u: "https://genai.owasp.org/resource/genai-red-teaming-guide/", s: "OWASP GenAI Red Teaming Guide" }
                 ]
             }]
         },
@@ -1174,19 +1122,19 @@
                 title: "Social Engineering",
                 topics: [
                     { n: "Social Engineering Fundamentals", u: "https://www.social-engineer.org/framework/", s: "Social-Engineer.org" },
-                    { n: "Phishing & Pretexting", u: "https://tryhackme.com/room/phishingemails1", s: "TryHackMe" },
-                    { n: "OSINT for Social Engineering", u: "https://osintframework.com/", s: "OSINT Framework" },
-                    { n: "Physical Social Engineering", u: "https://www.youtube.com/watch?v=O5lXUSMGQ2I", s: "DEF CON 23" },
-                    { n: "Influence & Manipulation", u: "https://www.youtube.com/watch?v=JraHV1ai9eQ", s: "Chris Hadnagy" }
+                    { n: "Phishing & Pretexting", u: "https://www.social-engineer.org/framework/attack-vectors/phishing-attacks-2/", s: "Social-Engineer.org (Phishing)", extra: [{ u: "https://www.social-engineer.org/framework/influencing-others/pretexting/", s: "Social-Engineer.org (Pretexting)" }] },
+                    { n: "OSINT for Social Engineering", u: "https://pmc.ncbi.nlm.nih.gov/articles/PMC10504660/", s: "PMC Research Article" },
+                    { n: "Physical Social Engineering", u: "https://www.social-engineer.org/podcasts/episode-028-getting-physical-with-social-engineering/", s: "Social-Engineer.org Podcast", extra: [{ u: "https://www.social-engineer.org/framework/information-gathering/physical-methods-of-information-gathering/", s: "Social-Engineer.org Framework" }] },
+                    { n: "Influence & Manipulation", u: "https://www.social-engineer.org/framework/influencing-others/manipulation/", s: "Social-Engineer.org (Manipulation)", extra: [{ u: "https://www.social-engineer.org/framework/influencing-others/influence-tactics/", s: "Social-Engineer.org (Influence Tactics)" }] }
                 ]
             }, {
                 num: "48",
                 title: "OSINT (Open Source Intelligence)",
                 topics: [
                     { n: "OSINT Fundamentals", u: "https://osintframework.com/", s: "OSINT Framework" },
-                    { n: "Passive Reconnaissance", u: "https://tryhackme.com/room/ohsint", s: "TryHackMe" },
-                    { n: "Social Media OSINT", u: "https://github.com/laramies/theHarvester", s: "theHarvester" },
-                    { n: "Geolocation OSINT", u: "https://www.bellingcat.com/category/resources/", s: "Bellingcat Resources" },
+                    { n: "Passive Reconnaissance", u: "https://tryhackme.com/room/passiverecon", s: "TryHackMe" },
+                    { n: "Social Media OSINT", u: "https://osint.link/social-media-intelligence-socmint/", s: "OSINT.link (SOCMINT)" },
+                    { n: "Geolocation OSINT", u: "https://www.bellingcat.com/resources/how-tos/2023/05/08/finding-geolocation-leads-with-bellingcats-openstreetmap-search-tool/", s: "Bellingcat" },
                     { n: "Domain & IP OSINT", u: "https://github.com/laramies/theHarvester", s: "theHarvester" },
                     { n: "OSINT Tools Collection", u: "https://github.com/jivoi/awesome-osint", s: "Awesome OSINT" }
                 ]
@@ -1194,22 +1142,22 @@
                 num: "49",
                 title: "Kernel-Level & Rootkit Development",
                 topics: [
-                    { n: "Linux Kernel Modules", u: "https://sysprog21.github.io/lkmpg/", s: "Linux Kernel Module Guide" },
+                    { n: "Linux Kernel Modules", u: "https://docs.kernel.org/kbuild/modules.html", s: "Kernel.org Docs" },
                     { n: "Windows Kernel Drivers", u: "https://learn.microsoft.com/en-us/windows-hardware/drivers/", s: "Microsoft Driver Docs" },
                     { n: "Rootkit Techniques", u: "https://github.com/milabs/awesome-linux-rootkits", s: "awesome-linux-rootkits" },
-                    { n: "eBPF for Evasion", u: "https://ebpf.io/what-is-ebpf/", s: "eBPF.io" },
+                    { n: "eBPF for Evasion", u: "https://www.linuxfoundation.org/hubfs/eBPF/ControlPlane%20%E2%80%94%20eBPF%20Security%20Threat%20Model.pdf", s: "Linux Foundation" },
                     { n: "Kernel Debugging", u: "https://learn.microsoft.com/en-us/windows-hardware/drivers/debugger/", s: "WinDbg Docs" },
-                    { n: "Rootkit Detection & Analysis", u: "https://malwareunicorn.org/workshops/re101.html", s: "Malware Unicorn (workshops site)" }
+                    { n: "Rootkit Detection & Analysis", u: "https://learn.microsoft.com/en-us/sysinternals/downloads/rootkit-revealer", s: "Sysinternals RootkitRevealer" }
                 ]
             }, {
                 num: "50",
                 title: "Physical Security",
                 topics: [
-                    { n: "Lock Picking Basics", u: "https://www.youtube.com/watch?v=R2r07NN21vM", s: "BosnianBill" },
-                    { n: "Physical Penetration Testing", u: "https://www.youtube.com/watch?v=rnmcRTnTNC8", s: "Deviant Ollam" },
-                    { n: "RFID & Access Control", u: "https://www.youtube.com/watch?v=kVMAgiJlQkI", s: "DEF CON 23" },
-                    { n: "Surveillance & Tailgating", u: "https://www.youtube.com/watch?v=kVMAgiJlQkI", s: "DEF CON 23" },
-                    { n: "Physical Security Assessments", u: "https://www.redteamsecure.com/", s: "RedTeam Secure" }
+                    { n: "Lock Picking Basics", u: "https://locksport.net/files/LSI_Guide_To_Lockpicking.pdf", s: "LSI Guide" },
+                    { n: "Physical Penetration Testing", u: "https://www.isaca.org/about-us/newsroom/press-releases/2023/strategies-for-physical-penetration-testing-outlined-in-new-isaca-resource", s: "ISACA" },
+                    { n: "RFID & Access Control", u: "https://csrc.nist.gov/pubs/sp/800/98/final", s: "NIST SP 800-98" },
+                    { n: "Surveillance & Tailgating", u: "https://www.social-engineer.org/framework/information-gathering/physical-methods-of-information-gathering/", s: "Social-Engineer.org Framework" },
+                    { n: "Physical Security Assessments", u: "https://www.deepseas.com/solutions/offensive-security", s: "RedTeam Secure" }
                 ]
             }]
         },
@@ -1222,36 +1170,36 @@
                 num: "37",
                 title: "Engagement Planning",
                 topics: [
-                    { n: "Objectives", u: "https://attack.mitre.org/resources/", s: "MITRE Resources" },
-                    { n: "Scope", u: "https://attack.mitre.org/resources/", s: "MITRE Resources" },
-                    { n: "Rules of Engagement", u: "https://attack.mitre.org/resources/", s: "MITRE Resources" },
-                    { n: "Constraints", u: "https://attack.mitre.org/resources/", s: "MITRE Resources" },
-                    { n: "Safety Controls", u: "https://attack.mitre.org/resources/", s: "MITRE Resources" },
-                    { n: "Communications Plan", u: "https://attack.mitre.org/resources/", s: "MITRE Resources" },
-                    { n: "Stop Conditions", u: "https://attack.mitre.org/resources/", s: "MITRE Resources" }
+                    { n: "Objectives", u: "https://csrc.nist.gov/pubs/sp/800/115/final", s: "NIST SP 800-115" },
+                    { n: "Scope", u: "https://pages.nist.gov/OSCAL-Reference/models/v1.1.3/assessment-plan/", s: "NIST OSCAL (Assessment Plan Model)" },
+                    { n: "Rules of Engagement", u: "https://www.sans.org/posters/pen-test-rules-of-engagement-worksheet", s: "SANS Institute" },
+                    { n: "Constraints", u: "https://pages.nist.gov/OSCAL-Reference/models/v1.1.3/assessment-plan/", s: "NIST OSCAL (Assessment Plan Model)" },
+                    { n: "Safety Controls", u: "https://csrc.nist.gov/pubs/sp/800/115/final", s: "NIST SP 800-115" },
+                    { n: "Communications Plan", u: "https://csrc.nist.gov/pubs/sp/800/115/final", s: "NIST SP 800-115" },
+                    { n: "Stop Conditions", u: "https://csrc.nist.gov/pubs/sp/800/115/final", s: "NIST SP 800-115" }
                 ]
             }, {
                 num: "38",
                 title: "Campaign Execution",
                 topics: [
                     { n: "Initial Objectives", u: "https://attack.mitre.org/resources/adversary-emulation-plans/", s: "MITRE Emulation" },
-                    { n: "Attack-Path Management", u: "https://www.thehacker.recipes/ad/", s: "TheHacker.recipes" },
-                    { n: "Evidence Collection", u: "https://attack.mitre.org/resources/", s: "MITRE Resources" },
-                    { n: "Decision Points", u: "https://attack.mitre.org/resources/", s: "MITRE Resources" },
-                    { n: "Risk Management", u: "https://attack.mitre.org/resources/", s: "MITRE Resources" },
+                    { n: "Attack-Path Management", u: "https://attack.mitre.org/resources/adversary-emulation-plans/", s: "MITRE Emulation" },
+                    { n: "Evidence Collection", u: "https://csrc.nist.gov/pubs/sp/800/115/final", s: "NIST SP 800-115" },
+                    { n: "Decision Points", u: "https://attack.mitre.org/resources/adversary-emulation-plans/", s: "MITRE Emulation" },
+                    { n: "Risk Management", u: "https://csrc.nist.gov/pubs/sp/800/30/r1/final", s: "NIST SP 800-30" },
                     { n: "Detection Interaction", u: "https://github.com/redcanaryco/atomic-red-team", s: "Atomic Red Team" },
-                    { n: "Operational Reporting", u: "https://attack.mitre.org/resources/", s: "MITRE Resources" }
+                    { n: "Operational Reporting", u: "https://owasp.org/www-project-web-security-testing-guide/latest/5-Reporting/01-Reporting_Structure", s: "OWASP WSTG" }
                 ]
             }, {
                 num: "39",
                 title: "Purple Teaming",
                 topics: [
-                    { n: "Red/Blue Collaboration", u: "https://github.com/redcanaryco/atomic-red-team", s: "Atomic Red Team" },
-                    { n: "Detection Validation", u: "https://github.com/redcanaryco/atomic-red-team", s: "Atomic Red Team" },
-                    { n: "Attack Replay", u: "https://github.com/redcanaryco/atomic-red-team", s: "Atomic Red Team" },
+                    { n: "Red/Blue Collaboration", u: "https://github.com/scythe-io/purple-team-exercise-framework", s: "SCYTHE PTEF" },
+                    { n: "Detection Validation", u: "https://atomicredteam.io/", s: "Atomic Red Team" },
+                    { n: "Attack Replay", u: "https://github.com/mitre/caldera", s: "MITRE CALDERA" },
                     { n: "Detection Improvement", u: "https://github.com/SigmaHQ/sigma", s: "Sigma" },
-                    { n: "Coverage Measurement", u: "https://attack.mitre.org/", s: "MITRE ATT&CK" },
-                    { n: "Lessons Learned", u: "https://attack.mitre.org/resources/", s: "MITRE Resources" }
+                    { n: "Coverage Measurement", u: "https://mitre-attack.github.io/attack-navigator/", s: "MITRE ATT&CK Navigator" },
+                    { n: "Lessons Learned", u: "https://csrc.nist.gov/pubs/sp/800/61/r2/final", s: "NIST SP 800-61 Rev. 2" }
                 ]
             }]
         }, {
@@ -1263,12 +1211,12 @@
                 num: "40",
                 title: "Security Architecture",
                 topics: [
-                    { n: "Enterprise Architecture", u: "https://sabsa.org/", s: "SABSA" },
-                    { n: "Identity Architecture", u: "https://learn.microsoft.com/en-us/entra/identity/", s: "Microsoft Entra" },
-                    { n: "Network Architecture", u: "https://csrc.nist.gov/pubs/sp/800/215/final", s: "NIST SP 800-215" },
-                    { n: "Cloud Architecture", u: "https://docs.aws.amazon.com/whitepapers/latest/aws-overview/introduction.html", s: "AWS Whitepaper" },
-                    { n: "Security Control Design", u: "https://csrc.nist.gov/pubs/sp/800/53/r5/upd1/final", s: "NIST 800-53" },
-                    { n: "Attack-Path Modeling", u: "https://www.thehacker.recipes/ad/movement/index", s: "TheHacker.recipes" }
+                    { n: "Enterprise Architecture", u: "https://sabsa.org/sabsa-executive-summary/", s: "SABSA" },
+                    { n: "Identity Architecture", u: "https://learn.microsoft.com/en-us/entra/architecture/", s: "Microsoft Entra" },
+                    { n: "Network Architecture", u: "https://csrc.nist.gov/pubs/sp/800/207/final", s: "NIST SP 800-207 (Zero Trust)" },
+                    { n: "Cloud Architecture", u: "https://docs.aws.amazon.com/wellarchitected/latest/security-pillar/welcome.html", s: "AWS Well-Architected (Security)" },
+                    { n: "Security Control Design", u: "https://csrc.nist.gov/pubs/sp/800/53/r5/final", s: "NIST 800-53" },
+                    { n: "Attack-Path Modeling", u: "https://learn.microsoft.com/en-us/azure/defender-for-cloud/concept-attack-path", s: "Microsoft Defender for Cloud" }
                 ]
             }, {
                 num: "41",
@@ -1276,20 +1224,20 @@
                 topics: [
                     { n: "Threat Actor Profiling", u: "https://attack.mitre.org/groups/", s: "MITRE Groups" },
                     { n: "Campaign Analysis", u: "https://attack.mitre.org/campaigns/", s: "MITRE Campaigns" },
-                    { n: "Intelligence Requirements", u: "https://cloud.google.com/blog/topics/threat-intelligence/requirements-driven-approach-cti/", s: "Mandiant" },
-                    { n: "Attribution Limitations", u: "https://lawfaremedia.org/article/cyberattack-attribution-empowerment-and-constraint", s: "Lawfare" },
-                    { n: "Strategic Intelligence", u: "https://arxiv.org/pdf/2001.06616", s: "CTI Research (arXiv)" },
-                    { n: "Intelligence-to-Operation Pipeline", u: "https://quartermaster.substack.com/p/the-quartermaster-wednesday-12-june", s: "F3EAD Cycle" }
+                    { n: "Intelligence Requirements", u: "https://cloud.google.com/blog/topics/threat-intelligence/requirements-driven-approach-cti/", s: "Google Threat Intelligence" },
+                    { n: "Attribution Limitations", u: "https://www.lawfaremedia.org/article/cyberattack-attribution-empowerment-and-constraint", s: "Lawfare" },
+                    { n: "Strategic Intelligence", u: "https://www.enisa.europa.eu/topics/cyber-threats/threat-landscape", s: "ENISA Threat Landscape" },
+                    { n: "Intelligence-to-Operation Pipeline", u: "https://github.com/mitre/cti", s: "MITRE CTI (STIX/TAXII)" }
                 ]
             }, {
                 num: "42",
                 title: "Leadership",
                 topics: [
-                    { n: "Mentoring Operators", u: "https://en.wikipedia.org/wiki/Mentorship", s: "Wikipedia" },
-                    { n: "Technical Leadership", u: "https://en.wikipedia.org/wiki/Lead_programmer", s: "Wikipedia (Tech Lead)" },
-                    { n: "Decision-Making", u: "https://en.wikipedia.org/wiki/OODA_loop", s: "Wikipedia (OODA Loop)" },
-                    { n: "Delegation", u: "https://en.wikipedia.org/wiki/Delegation", s: "Wikipedia" },
-                    { n: "Team Development", u: "https://en.wikipedia.org/wiki/Tuckman%27s_stages_of_group_development", s: "Wikipedia (Tuckman)" },
+                    { n: "Mentoring Operators", u: "https://niccs.cisa.gov/workforce-development/nice-framework", s: "NICE Framework" },
+                    { n: "Technical Leadership", u: "https://niccs.cisa.gov/workforce-development/nice-framework", s: "NICE Framework" },
+                    { n: "Decision-Making", u: "https://www.nasa.gov/reference/6-8-decision-analysis", s: "NASA Systems Engineering (Decision Analysis)" },
+                    { n: "Delegation", u: "https://niccs.cisa.gov/workforce-development/nice-framework", s: "NICE Framework" },
+                    { n: "Team Development", u: "https://niccs.cisa.gov/workforce-development/nice-framework", s: "NICE Framework" },
                     { n: "Handling Operational Failure", u: "https://sre.google/sre-book/postmortem-culture/", s: "Google SRE Book" }
                 ]
             }, {
@@ -1297,13 +1245,13 @@
                 title: "Program Design",
                 topics: [
                     { n: "Building a Red-Team Program", u: "https://csrc.nist.gov/pubs/sp/800/115/final", s: "NIST SP 800-115" },
-                    { n: "Team Structure", u: "https://en.wikipedia.org/wiki/Red_team", s: "Wikipedia (Red Team)" },
-                    { n: "Tooling Strategy", u: "https://github.com/BishopFox/sliver", s: "Sliver" },
+                    { n: "Team Structure", u: "https://niccs.cisa.gov/workforce-development/nice-framework", s: "NICE Framework" },
+                    { n: "Tooling Strategy", u: "https://attack.mitre.org/software/", s: "MITRE ATT&CK Software" },
                     { n: "Infrastructure Strategy", u: "https://github.com/bluscreenofjeff/Red-Team-Infrastructure-Wiki", s: "RT Infra Wiki" },
-                    { n: "Metrics", u: "https://attack.mitre.org/resources/attack-data-and-tools/", s: "MITRE ATT&CK" },
+                    { n: "Metrics", u: "https://mitre-attack.github.io/attack-navigator/", s: "MITRE ATT&CK Navigator" },
                     { n: "Budgeting", u: "https://csrc.nist.gov/pubs/sp/800/53/r5/upd1/final", s: "NIST 800-53" },
                     { n: "Risk Management", u: "https://csrc.nist.gov/pubs/sp/800/30/r1/final", s: "NIST 800-30" },
-                    { n: "Executive Stakeholder Management", u: "https://tryhackme.com/room/writingpentestreports", s: "TryHackMe" }
+                    { n: "Executive Stakeholder Management", u: "https://www.isaca.org/resources/isaca-journal/issues/2022/volume-1/strengthening-cybersecurity-with-red-team-engagements", s: "ISACA" }
                 ]
             }]
         }, {
@@ -1316,21 +1264,21 @@
                 title: "Technical Reporting",
                 topics: [
                     { n: "Finding Documentation", u: "https://owasp.org/www-project-web-security-testing-guide/", s: "OWASP WSTG" },
-                    { n: "Evidence", u: "https://tryhackme.com/room/writingpentestreports", s: "TryHackMe" },
+                    { n: "Evidence", u: "https://owasp.org/www-project-web-security-testing-guide/latest/5-Reporting/01-Reporting_Structure", s: "OWASP WSTG" },
                     { n: "Reproduction", u: "https://github.com/OWASP/wstg", s: "OWASP WSTG (GitHub)" },
                     { n: "Root Cause", u: "https://cwe.mitre.org/", s: "CWE Database" },
-                    { n: "Risk", u: "https://nvd.nist.gov/vuln-metrics/cvss", s: "NIST CVSS" },
+                    { n: "Risk", u: "https://nvd.nist.gov/vuln-metrics/cvss", s: "NIST CVSS", extra: [{ u: "https://owasp.org/www-community/OWASP_Risk_Rating_Methodology", s: "OWASP Risk Rating Methodology" }] },
                     { n: "Remediation", u: "https://attack.mitre.org/mitigations/enterprise/", s: "MITRE Mitigations" }
                 ]
             }, {
                 num: "45",
                 title: "Executive Reporting",
                 topics: [
-                    { n: "Business Impact", u: "https://tryhackme.com/room/writingpentestreports", s: "TryHackMe" },
-                    { n: "Attack Narrative", u: "https://attack.mitre.org/matrices/enterprise/", s: "MITRE ATT&CK Matrix" },
-                    { n: "Critical Attack Paths", u: "https://www.thehacker.recipes/ad/", s: "TheHacker.recipes" },
-                    { n: "Defensive Gaps", u: "https://attack.mitre.org/detections/", s: "MITRE ATT&CK" },
-                    { n: "Strategic Recommendations", u: "https://attack.mitre.org/mitigations/enterprise/", s: "MITRE Mitigations" }
+                    { n: "Business Impact", u: "https://owasp.org/www-project-web-security-testing-guide/latest/5-Reporting/01-Reporting_Structure", s: "OWASP WSTG" },
+                    { n: "Attack Narrative", u: "https://redteam.guide/docs/Templates/report_template/", s: "Red Team Guide" },
+                    { n: "Critical Attack Paths", u: "https://learn.microsoft.com/en-us/azure/defender-for-cloud/concept-attack-path", s: "Microsoft Defender for Cloud" },
+                    { n: "Defensive Gaps", u: "https://attack.mitre.org/detectionstrategies/", s: "MITRE ATT&CK" },
+                    { n: "Strategic Recommendations", u: "https://owasp.org/www-project-web-security-testing-guide/v42/5-Reporting/README", s: "OWASP WSTG" }
                 ]
             }]
         }, {
@@ -1342,18 +1290,18 @@
                 num: "46",
                 title: "Full Enterprise Simulation",
                 topics: [
-                    { n: "Threat Intelligence Brief", u: "https://attack.mitre.org/groups/", s: "MITRE Groups" },
+                    { n: "Threat Intelligence Brief", u: "https://ctid.mitre.org/videos/cti-blueprints-stream/", s: "MITRE CTID (CTI Blueprints)" },
                     { n: "Threat Model", u: "https://owasp.org/www-community/Threat_Modeling", s: "OWASP" },
-                    { n: "Rules of Engagement", u: "https://www.sans.org/posters/pen-test-rules-of-engagement-worksheet/", s: "SANS Institute" },
-                    { n: "Attack-Surface Assessment", u: "https://tryhackme.com/room/redteamrecon", s: "TryHackMe" },
-                    { n: "Identity Assessment", u: "https://www.thehacker.recipes/ad/", s: "TheHacker.recipes" },
-                    { n: "Cloud Assessment", u: "https://hackingthe.cloud/", s: "Hacking the Cloud" },
+                    { n: "Rules of Engagement", u: "https://www.sans.org/posters/pen-test-rules-of-engagement-worksheet", s: "SANS Institute" },
+                    { n: "Attack-Surface Assessment", u: "https://csrc.nist.gov/pubs/journal/2018/12/network-attack-surface-resilience-against-zerodays/final", s: "NIST" },
+                    { n: "Identity Assessment", u: "https://learn.microsoft.com/en-us/defender-for-identity/security-assessment", s: "Microsoft Defender for Identity" },
+                    { n: "Cloud Assessment", u: "https://cloudsecurityalliance.org/star/", s: "Cloud Security Alliance (STAR)" },
                     { n: "Adversary Emulation", u: "https://attack.mitre.org/resources/adversary-emulation-plans/", s: "MITRE Emulation" },
                     { n: "Detection Validation", u: "https://github.com/redcanaryco/atomic-red-team", s: "Atomic Red Team" },
-                    { n: "Purple-Team Review", u: "https://github.com/redcanaryco/atomic-red-team", s: "Atomic Red Team" },
-                    { n: "Technical Report", u: "https://tryhackme.com/room/writingpentestreports", s: "TryHackMe" },
-                    { n: "Executive Briefing", u: "https://tryhackme.com/room/writingpentestreports", s: "TryHackMe" },
-                    { n: "After-Action Review", u: "https://www.cisa.gov/resources-tools/services/cisa-tabletop-exercise-packages", s: "CISA" },
+                    { n: "Purple-Team Review", u: "https://attack.mitre.org/resources/get-started/adversary-emulation-and-red-teaming/", s: "MITRE ATT&CK" },
+                    { n: "Technical Report", u: "https://csrc.nist.gov/pubs/sp/800/115/final", s: "NIST SP 800-115" },
+                    { n: "Executive Briefing", u: "https://owasp.org/www-project-web-security-testing-guide/latest/5-Reporting/01-Reporting_Structure", s: "OWASP WSTG" },
+                    { n: "After-Action Review", u: "https://www.cisa.gov/sites/default/files/c3vp/crr_resources_guides/CRR_Resource_Guide-IM.pdf", s: "CISA" },
                     { n: "Defensive Improvement Plan", u: "https://attack.mitre.org/mitigations/enterprise/", s: "MITRE Mitigations" }
                 ]
             }]
@@ -1662,21 +1610,21 @@
                 padding:26px;
                 border:1px solid var(--border);
                 border-radius:18px;
-                background:linear-gradient(135deg,rgba(0,255,150,.06),rgba(0,0,0,.10));
+                background:linear-gradient(135deg,rgba(224,32,47,.10),rgba(0,0,0,.10));
                 margin-bottom:16px;
             }
             .pm-kicker{
                 font-size:.72rem;
                 letter-spacing:.14em;
                 font-weight:800;
-                color:var(--green);
+                color:var(--accent);
                 margin-bottom:7px;
             }
             .pm-header h2{margin:0 0 7px;font-size:1.7rem}
             .pm-header p{margin:0;opacity:.78}
             .pm-badge,.pm-status{
-                border:1px solid var(--green);
-                color:var(--green);
+                border:1px solid var(--accent);
+                color:var(--accent);
                 border-radius:999px;
                 padding:7px 11px;
                 font-size:.7rem;
@@ -1718,12 +1666,12 @@
             .pm-card h4{font-size:.76rem;text-transform:uppercase;letter-spacing:.08em;margin:17px 0 9px}
             .pm-card ul{list-style:none;padding:0;margin:0}
             .pm-card li{margin:7px 0;font-size:.82rem;line-height:1.45}
-            .pm-card input{accent-color:var(--green)}
+            .pm-card input{accent-color:var(--accent)}
             .pm-deliverable{
                 margin-top:15px;
                 padding:12px;
-                border-left:3px solid var(--green);
-                background:rgba(0,255,150,.035);
+                border-left:3px solid var(--accent);
+                background:rgba(224,32,47,.045);
                 font-size:.8rem;
             }
             .pm-deliverable p{margin:6px 0 0;line-height:1.5;opacity:.8}
@@ -1756,7 +1704,7 @@
                 flex-direction:column;
                 gap:5px;
             }
-            .pm-project-grid b{font-size:.68rem;color:var(--green);letter-spacing:.08em}
+            .pm-project-grid b{font-size:.68rem;color:var(--accent);letter-spacing:.08em}
             .pm-project-grid span{font-size:.8rem}
             .pm-rule{
                 margin-top:16px;
@@ -1788,27 +1736,91 @@
             return `p${partId}-s${sectionNum}-t${topicIndex}`;
         }
 
+        // ---- Icon + badge helpers for the card grid ----
+        const ICONS = {
+            shield: '<path d="M12 2 4 5v6c0 5 3.5 9 8 11 4.5-2 8-6 8-11V5z"/>',
+            network: '<circle cx="12" cy="5" r="2"/><circle cx="5" cy="19" r="2"/><circle cx="19" cy="19" r="2"/><path d="M12 7v5M12 12 6 17M12 12l6 5"/>',
+            terminal: '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="m7 9 3 3-3 3M13 15h4"/>',
+            windows: '<rect x="3" y="3" width="8" height="8"/><rect x="13" y="3" width="8" height="8"/><rect x="3" y="13" width="8" height="8"/><rect x="13" y="13" width="8" height="8"/>',
+            code: '<path d="m8 6-5 6 5 6M16 6l5 6-5 6M13 4l-2 16"/>',
+            globe: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 3 2.5 15 0 18M12 3c-2.5 3-2.5 15 0 18"/>',
+            api: '<rect x="3" y="8" width="18" height="8" rx="2"/><path d="M7 8V6a2 2 0 0 1 2-2M17 8V6a2 2 0 0 0-2-2M8 12h1M12 12h1M16 12h1"/>',
+            lockshield: '<path d="M12 2 4 5v6c0 5 3.5 9 8 11 4.5-2 8-6 8-11V5z"/><rect x="9" y="11" width="6" height="5" rx="1"/><path d="M10 11V9a2 2 0 0 1 4 0v2"/>',
+            cloud: '<path d="M7 18a4 4 0 0 1-.5-7.97A5.5 5.5 0 0 1 17 9.5 4 4 0 0 1 17 18H7z"/>',
+            search: '<circle cx="11" cy="11" r="7"/><path d="m21 21-4-4"/>',
+            crosshair: '<circle cx="12" cy="12" r="9"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/>',
+            burst: '<path d="M12 2v6M12 16v6M4.9 4.9l4.2 4.2M14.9 14.9l4.2 4.2M2 12h6M16 12h6M4.9 19.1l4.2-4.2M14.9 9.1l4.2-4.2"/>',
+            arrowup: '<path d="M12 19V5M6 11l6-6 6 6"/>',
+            mask: '<path d="M4 8c0-3 3-5 8-5s8 2 8 5c0 5-3 9-8 9s-8-4-8-9Z"/><circle cx="9" cy="9" r="1" fill="currentColor"/><circle cx="15" cy="9" r="1" fill="currentColor"/>',
+            spy: '<path d="M3 12c2-4 5-6 9-6s7 2 9 6c-2 4-5 6-9 6s-7-2-9-6Z"/><circle cx="12" cy="12" r="2.5"/>',
+            cpu: '<rect x="6" y="6" width="12" height="12" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M9 2v3M15 2v3M9 19v3M15 19v3M2 9h3M2 15h3M19 9h3M19 15h3"/>',
+            biohazard: '<circle cx="12" cy="12" r="1.6" fill="currentColor"/><circle cx="12" cy="7" r="2.4"/><circle cx="7.7" cy="14.5" r="2.4"/><circle cx="16.3" cy="14.5" r="2.4"/>',
+            eye: '<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>',
+            smartphone: '<rect x="6" y="2" width="12" height="20" rx="2"/><path d="M11 18h2"/>',
+            flag: '<path d="M5 21V4M5 4h11l-2 3 2 3H5"/>',
+            gradcap: '<path d="M2 9 12 4l10 5-10 5-10-5Z"/><path d="M6 11.5V17c0 1.5 3 3 6 3s6-1.5 6-3v-5.5"/>'
+        };
+        function getPartIcon(title) {
+            const t = title.toLowerCase();
+            let key = 'shield';
+            if (t.includes('network')) key = 'network';
+            else if (t.includes('linux') || t.includes('bash')) key = 'terminal';
+            else if (t.includes('windows')) key = 'windows';
+            else if (t.includes('programming') || t.includes('automation')) key = 'code';
+            else if (t.includes('api')) key = 'api';
+            else if (t.includes('web')) key = 'globe';
+            else if (t.includes('identity') || t.includes('enterprise')) key = 'lockshield';
+            else if (t.includes('cloud')) key = 'cloud';
+            else if (t.includes('reconnaissance') || t.includes('recon')) key = 'search';
+            else if (t.includes('vulnerability') && t.includes('research')) key = 'search';
+            else if (t.includes('vulnerability')) key = 'crosshair';
+            else if (t.includes('exploit')) key = 'burst';
+            else if (t.includes('privilege')) key = 'arrowup';
+            else if (t.includes('red team') || t.includes('adversary') || t.includes('tradecraft')) key = 'mask';
+            else if (t.includes('operational') || t.includes('opsec')) key = 'spy';
+            else if (t.includes('reverse') || t.includes('malware')) key = 'cpu';
+            else if (t.includes('detection') || t.includes('evasion') || t.includes('awareness')) key = 'eye';
+            else if (t.includes('specialized') || t.includes('mobile') || t.includes('wireless')) key = 'smartphone';
+            else if (t.includes('ai')) key = 'cpu';
+            else if (t.includes('capstone')) key = 'gradcap';
+            else if (t.includes('optional') || t.includes('social') || t.includes('physical')) key = 'flag';
+            else if (t.includes('offensive')) key = 'crosshair';
+            return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${ICONS[key]}</svg>`;
+        }
+        function getBadge(part) {
+            if (part.optional) return { cls: 'optional-b', label: 'OPTIONAL' };
+            if (part.id <= 2) return { cls: 'foundation', label: 'FOUNDATION' };
+            if (part.id <= 9) return { cls: 'core', label: 'CORE' };
+            return { cls: 'advanced', label: 'ADVANCED' };
+        }
+
         function renderCurriculum() {
             totalTopics = 0;
             let html = '';
             curriculumData.forEach((part, pIdx) => {
                 const partId = part.id;
                 const partClass = part.optional ? 'part optional' : 'part';
-                const optionalBadge = part.optional ? '<span class="optional-badge">OPTIONAL</span>' : '';
+                const badge = getBadge(part);
                 html += `
-                    <div class="${partClass}" data-part="${partId}">
+                    <div class="${partClass}" data-part="${partId}" data-optional="${part.optional ? '1' : '0'}">
                         <div class="part-header" onclick="togglePart(this)">
-                            <div class="part-num">${String(partId).padStart(2,'0')}</div>
-                            <div class="part-title">
-                                <h2>${part.title}</h2>
-                                <p>${part.subtitle}</p>
+                            <div class="part-face-top">
+                                <span class="part-num-tag">PART ${String(partId).padStart(2,'0')}</span>
+                                <span class="badge ${badge.cls}">${badge.label}</span>
                             </div>
-                            ${optionalBadge}
-                            <div class="part-progress">
-                                <div class="bar"><div class="fill" id="part-fill-${partId}"></div></div>
-                                <span id="part-count-${partId}">0/0</span>
+                            <div class="part-icon">${getPartIcon(part.title)}</div>
+                            <div class="part-title-wrap">
+                                <div class="part-title">${part.title}</div>
+                                <div class="part-subtitle">${part.subtitle}</div>
                             </div>
-                            <span class="arrow">▶</span>
+                            <div class="part-progress-row">
+                                <div class="pct-line">
+                                    <span class="part-pct" id="part-pct-${partId}">0%</span>
+                                    <span class="part-count-label" id="part-count-${partId}">0/0</span>
+                                </div>
+                                <div class="part-bar"><div class="fill" id="part-fill-${partId}"></div></div>
+                            </div>
+                            <span class="part-arrow">▶</span>
                         </div>
                         <div class="part-content">`;
                 part.sections.forEach((section, sIdx) => {
@@ -1832,7 +1844,9 @@
                                     onchange="toggleTopic('${tId}', this)" aria-label="Mark ${topic.n} as complete">
                                 <span class="topic-name">${topic.n}</span>
                                 <a class="topic-link" href="${topic.u}" target="_blank" rel="noopener noreferrer" 
-                                    title="Open ${topic.s} resource">↗ ${topic.s}</a>
+                                    title="Open ${topic.s} resource">↗ ${topic.s}</a>${(topic.extra || []).map(ex => `
+                                <a class="topic-link" href="${ex.u}" target="_blank" rel="noopener noreferrer" 
+                                    title="Open ${ex.s} resource">↗ ${ex.s}</a>`).join('')}
                             </div>`;
                     });
                     html += `</div></div>`;
@@ -1847,6 +1861,24 @@
                 if (firstPart) firstPart.classList.add('open');
             }
             restoreOpenState();
+        }
+
+        function filterParts(mode, btn) {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            document.querySelectorAll('.part').forEach(p => {
+                const isOptional = p.dataset.optional === '1';
+                let show = true;
+                if (mode === 'core') show = !isOptional;
+                if (mode === 'optional') show = isOptional;
+                p.classList.toggle('filtered-out', !show);
+            });
+        }
+
+        function setView(mode, btn) {
+            document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            container.classList.toggle('list-view', mode === 'list');
         }
 
         function togglePart(el) {
@@ -1885,22 +1917,63 @@
             const circumference = 138.23;
             const offset = circumference - (pct / 100) * circumference;
             circle.style.strokeDashoffset = offset;
+            let firstIncompletePart = null;
+            let totalSections = 0;
+            let completeSections = 0;
             curriculumData.forEach(part => {
                 const partId = part.id;
                 let partTotal = 0;
                 let partDone = 0;
                 part.sections.forEach((section, sIdx) => {
+                    let secDone = 0;
                     section.topics.forEach((topic, tIdx) => {
                         const tId = generateId(partId, section.num, tIdx);
                         partTotal++;
-                        if (completedTopics.has(tId)) partDone++;
+                        if (completedTopics.has(tId)) { partDone++; secDone++; }
                     });
+                    totalSections++;
+                    if (secDone === section.topics.length) completeSections++;
                 });
+                const partPct = partTotal > 0 ? Math.round((partDone / partTotal) * 100) : 0;
                 const fillEl = document.getElementById(`part-fill-${partId}`);
+                const pctEl = document.getElementById(`part-pct-${partId}`);
                 const countEl = document.getElementById(`part-count-${partId}`);
-                if (fillEl) fillEl.style.width = partTotal > 0 ? (partDone / partTotal * 100) + '%' : '0%';
+                if (fillEl) fillEl.style.width = partPct + '%';
+                if (pctEl) pctEl.textContent = partPct + '%';
                 if (countEl) countEl.textContent = `${partDone}/${partTotal}`;
+                if (firstIncompletePart === null && partDone < partTotal) firstIncompletePart = part;
             });
+            updateHeroStats(pct, firstIncompletePart, completeSections, totalSections);
+        }
+
+        function updateHeroStats(pct, focusPart, completeSections, totalSections) {
+            const stageEl = document.getElementById('stage-name');
+            const stageDescEl = document.getElementById('stage-desc');
+            let stage = 'Recruit', desc = 'Just getting started. Every operator begins here.';
+            if (pct >= 100) { stage = 'Principal'; desc = 'Full curriculum mastered. Lead from the front.'; }
+            else if (pct >= 85) { stage = 'Senior Operator'; desc = 'Nearly there. Sharpen the advanced tradecraft.'; }
+            else if (pct >= 60) { stage = 'Operator'; desc = 'Keep building. The shadows are your training ground.'; }
+            else if (pct >= 30) { stage = 'Operative'; desc = 'Core skills forming. Stay consistent.'; }
+            else if (pct >= 10) { stage = 'Recruit'; desc = 'Foundations underway. Build the base first.'; }
+            if (stageEl) stageEl.textContent = stage;
+            if (stageDescEl) stageDescEl.textContent = desc;
+
+            const focusTitleEl = document.getElementById('focus-title');
+            const focusDescEl = document.getElementById('focus-desc');
+            const milestoneTitleEl = document.getElementById('milestone-title');
+            const milestoneFracEl = document.getElementById('milestone-frac');
+            const milestoneBarEl = document.getElementById('milestone-bar');
+            if (focusPart) {
+                if (focusTitleEl) focusTitleEl.textContent = focusPart.title;
+                if (focusDescEl) focusDescEl.textContent = focusPart.subtitle;
+                if (milestoneTitleEl) milestoneTitleEl.textContent = `Complete Part ${focusPart.id}`;
+            } else {
+                if (focusTitleEl) focusTitleEl.textContent = 'Complete';
+                if (focusDescEl) focusDescEl.textContent = 'Every part finished. Outstanding work.';
+                if (milestoneTitleEl) milestoneTitleEl.textContent = 'Roadmap Complete';
+            }
+            if (milestoneFracEl) milestoneFracEl.textContent = `${completeSections} / ${totalSections} Sections`;
+            if (milestoneBarEl) milestoneBarEl.style.width = (totalSections > 0 ? (completeSections / totalSections * 100) : 0) + '%';
         }
 
         function expandAll() {
@@ -1963,18 +2036,18 @@
    FINAL PRINCIPAL MASTERY SYSTEM
    Prerequisite graph + capability audit + final gate
    ============================================================ */
-.pf-wrap{max-width:1400px;margin:0 auto 70px;padding:0 18px}
+.pf-wrap{max-width:1400px;margin:0 auto 70px;margin-left:calc(220px + 18px);padding:0 18px}
 .pf-panel{border:1px solid var(--border);border-radius:18px;padding:22px;margin-top:18px;background:rgba(255,255,255,.018)}
 .pf-head{display:flex;justify-content:space-between;gap:18px;align-items:flex-start}
 .pf-head h2,.pf-head h3{margin:0 0 7px}
 .pf-head p{margin:0;opacity:.75;line-height:1.5}
-.pf-pill{border:1px solid var(--green);color:var(--green);border-radius:999px;padding:7px 11px;font-size:.68rem;font-weight:900;letter-spacing:.08em;white-space:nowrap}
+.pf-pill{border:1px solid var(--accent);color:var(--accent);border-radius:999px;padding:7px 11px;font-size:.68rem;font-weight:900;letter-spacing:.08em;white-space:nowrap}
 .pf-progress{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:16px}
 .pf-stat{border:1px solid var(--border);border-radius:12px;padding:13px}
 .pf-stat b{display:block;font-size:1.25rem}
 .pf-stat span{font-size:.7rem;opacity:.65}
 .pf-bar{height:8px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden;margin-top:10px}
-.pf-fill{height:100%;width:0;background:var(--green);transition:width .2s}
+.pf-fill{height:100%;width:0;background:var(--accent);transition:width .2s}
 .pf-graph{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-top:15px}
 .pf-node{border:1px solid var(--border);border-radius:12px;padding:12px;position:relative}
 .pf-node strong{font-size:.76rem;display:block}
@@ -1983,13 +2056,14 @@
 .pf-node:last-child::after{display:none}
 .pf-gate{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;margin-top:14px}
 .pf-gate label{border:1px solid var(--border);border-radius:10px;padding:11px;font-size:.76rem;display:flex;gap:8px;align-items:flex-start}
-.pf-gate input{margin-top:2px;accent-color:var(--green)}
+.pf-gate input{margin-top:2px;accent-color:var(--accent)}
 .pf-audit{width:100%;border-collapse:collapse;margin-top:14px;font-size:.75rem}
 .pf-audit th,.pf-audit td{border-bottom:1px solid var(--border);padding:10px;text-align:left;vertical-align:top}
 .pf-audit th{font-size:.68rem;text-transform:uppercase;letter-spacing:.06em;opacity:.7}
-.pf-audit input{accent-color:var(--green)}
-.pf-note{margin-top:14px;padding:13px;border-left:3px solid var(--green);background:rgba(0,255,150,.035);font-size:.78rem;line-height:1.55}
+.pf-audit input{accent-color:var(--accent)}
+.pf-note{margin-top:14px;padding:13px;border-left:3px solid var(--accent);background:rgba(224,32,47,.045);font-size:.78rem;line-height:1.55}
 .pf-reset{margin-top:12px;border:1px solid var(--border);background:transparent;color:inherit;border-radius:8px;padding:7px 10px;cursor:pointer}
+@media(max-width:980px){.pf-wrap{margin-left:auto}}
 @media(max-width:700px){.pf-progress{grid-template-columns:repeat(2,1fr)}.pf-head{flex-direction:column}.pf-node::after{display:none}.pf-audit{font-size:.68rem}}
 </style>
 
